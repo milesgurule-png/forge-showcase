@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge Labs Science Lab</title>
+<style>
+  :root { --bg:#0b0f17; --panel:#121826ee; --line:#273047; --text:#e6ebf5; --muted:#8b95ab; --accent:#3dd6d0; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text); font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; }
+  #app { position:fixed; inset:0; }
+  .hud { position:fixed; top:14px; left:16px; z-index:5; pointer-events:none; }
+  .hud h1 { margin:0; font-size:18px; letter-spacing:.3px; }
+  .hud .sub { color:var(--muted); font-size:12px; margin-top:2px; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+  #banner { position:fixed; top:14px; left:50%; transform:translateX(-50%); z-index:6; background:#3a2a0e; border:1px solid #8a6a2a; color:#ffd88a; padding:8px 14px; border-radius:8px; font-size:13px; display:none; }
+  #roster { position:fixed; left:16px; bottom:16px; z-index:5; display:flex; gap:8px; flex-wrap:wrap; max-width:calc(100% - 32px); }
+  .chip { background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:6px 12px; cursor:pointer; font-size:13px; white-space:nowrap; }
+  .chip:hover, .chip.sel { border-color:var(--accent); }
+  .chip small { color:var(--muted); margin-left:6px; }
+  #panel { position:fixed; top:0; right:0; bottom:0; width:min(420px,100%); z-index:7; background:var(--panel); backdrop-filter:blur(8px); border-left:1px solid var(--line); transform:translateX(100%); transition:transform .25s ease; display:flex; flex-direction:column; }
+  #panel.open { transform:none; }
+  .ph { padding:16px 18px 10px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:flex-start; }
+  .avatar { width:42px; height:42px; border-radius:50%; flex:none; display:grid; place-items:center; font-weight:700; color:#0b0f17; }
+  .ph h2 { margin:0; font-size:17px; }
+  .ph .role { color:var(--muted); font-size:13px; }
+  .state { display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
+  .state.working { background:#173a2a; color:#6be09a; } .state.idle { background:#2b2f3a; color:#aab3c5; } .state.reviewing { background:#3a3417; color:#f5d36b; }
+  .close { margin-left:auto; background:none; border:0; color:var(--muted); font-size:22px; cursor:pointer; line-height:1; }
+  .pb { overflow:auto; padding:12px 18px; flex:1; }
+  .sec { margin-bottom:14px; }
+  .sec h3 { margin:0 0 4px; font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); }
+  .sec p { margin:0; }
+  .upd { color:var(--accent); font-size:11px; margin-left:6px; }
+  .recent a { display:block; color:var(--text); text-decoration:none; padding:3px 0; border-bottom:1px dashed var(--line); font-size:13px; }
+  .recent a:hover { color:var(--accent); }
+  #chat { border-top:1px solid var(--line); display:flex; flex-direction:column; height:42%; min-height:220px; }
+  #msgs { flex:1; overflow:auto; padding:10px 18px; display:flex; flex-direction:column; gap:8px; }
+  .m { max-width:88%; padding:8px 11px; border-radius:12px; white-space:pre-wrap; font-size:13.5px; }
+  .m.you { align-self:flex-end; background:#1f3b5a; }
+  .m.them { align-self:flex-start; background:#1c2233; border:1px solid var(--line); }
+  .m.sys { align-self:center; color:var(--muted); font-size:12px; background:none; }
+  form { display:flex; gap:8px; padding:10px 14px 14px; }
+  input { flex:1; background:#0e1320; color:var(--text); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font:inherit; }
+  input:focus { outline:none; border-color:var(--accent); }
+  button.send { background:var(--accent); color:#06201f; border:0; border-radius:10px; padding:0 14px; font-weight:600; cursor:pointer; }
+  button.send:disabled { opacity:.5; cursor:default; }
+  .label { color:#fff; font-size:11px; opacity:.9; font-weight:600; text-shadow:0 1px 3px #000; pointer-events:none; white-space:nowrap; }
+  .bubble { transition:opacity .4s ease; opacity:0; background:#ffffffee; color:#111; font-size:11.5px; padding:4px 9px; border-radius:10px; max-width:220px; white-space:normal; text-align:center; box-shadow:0 2px 8px #0008; pointer-events:none; position:relative; }
+  .bubble:after { content:""; position:absolute; left:50%; bottom:-5px; margin-left:-5px; border:5px solid transparent; border-bottom:0; border-top-color:#ffffffee; }
+  .bubble.show { opacity:1; }
+  #rooms { position:fixed; top:64px; left:16px; z-index:5; display:flex; flex-wrap:wrap; gap:6px; max-width:min(640px, calc(100% - 32px)); }
+  #rooms button { background:var(--panel); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:5px 10px; font:12px system-ui; cursor:pointer; }
+  #rooms button:hover { border-color:var(--accent); }
+  .help { position:fixed; right:16px; bottom:16px; z-index:4; color:var(--muted); font-size:12px; text-align:right; pointer-events:none; }
+  @media (max-width:640px){ #panel{ width:100%; } .help{ display:none; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div class="hud">
+  <h1>Forge Labs · Science Lab</h1>
+  <div class="sub"><span id="aiDot" class="dot" style="background:#777"></span><span id="aiText">Connecting…</span> · <span id="sync">—</span></div>
+</div>
+<a href="../atom.html" style="position:fixed;top:14px;right:16px;z-index:6;background:#121826ee;border:1px solid #273047;color:#e6ebf5;padding:7px 12px;border-radius:8px;text-decoration:none;font-size:13px">⚛️ Vault Atom</a>
+<div id="banner">Live demo with sample data. The real lab runs locally and connects to my AI agents.</div>
+<div id="rooms"></div>
+<div id="roster"></div>
+<div class="help">Click a scientist to see their work and chat · drag to orbit · scroll to zoom</div>
+
+<aside id="panel" aria-label="Scientist details">
+  <div class="ph">
+    <div class="avatar" id="pAv"></div>
+    <div><h2 id="pName"></h2><div class="role" id="pRole"></div><span class="state" id="pState"></span></div>
+    <button class="close" id="pClose" aria-label="Close">×</button>
+  </div>
+  <div class="pb">
+    <div class="sec"><h3>Doing now</h3><p id="pNow"></p></div>
+    <div class="sec"><h3>Summary <span class="upd" id="pUpd"></span></h3><p id="pSum"></p></div>
+    <div class="sec"><h3>Up next</h3><p id="pNext"></p></div>
+    <div class="sec recent"><h3>Recent work (<span id="pCount">0</span> notes)</h3><div id="pRecent"></div></div>
+  </div>
+  <div id="chat">
+    <div id="msgs"></div>
+    <form id="form"><input id="inp" placeholder="Ask them anything…" autocomplete="off"><button class="send" id="sendBtn">Send</button></form>
+  </div>
+</aside>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { buildWorld } from './v3/world.js';
+import { makePerson } from './v3/people.js';
+
+// ============================================================ data
+const DEFAULT_AGENTS = [
+  { id:'director',   name:'Dr. Vale',   role:'Lab Director',      color:'#f5c542' },
+  { id:'historian',  name:'Dr. Hayes',  role:'Historian',         color:'#e07a5f' },
+  { id:'tech-scout', name:'Dr. Rivera', role:'Tech Scout',        color:'#3dd6d0' },
+  { id:'model-lab',  name:'Dr. Okafor', role:'3D Model Engineer', color:'#9b7bff' },
+  { id:'ai-lab',     name:'Dr. Chen',   role:'AI Researcher',     color:'#5ad16b' },
+  { id:'venture',    name:'Dr. Morgan', role:'Venture Architect', color:'#20c997' },
+  { id:'physicist',  name:'Dr. Sato',   role:'Physicist',         color:'#74c0fc' },
+  { id:'quant',      name:'Dr. Kim',    role:'Quant',             color:'#ffa94d' },
+  { id:'psychologist', name:'Dr. Reyes', role:'Psychologist',      color:'#ff7eb6' },
+];
+// skin, hair, style, height scale, build, glasses, pants
+const LOOKS = {
+  'director':  { skin:'#c68642', hair:'#2b1b10', style:'short', h:1.03, w:1.05, glasses:false, pants:'#2d3446' },
+  'historian': { skin:'#f1c27d', hair:'#8a5a2b', style:'bun',   h:0.96, w:0.95, glasses:true,  pants:'#4a3b30' },
+  'tech-scout':{ skin:'#8d5524', hair:'#121212', style:'short', h:1.00, w:1.00, glasses:false, pants:'#26303f' },
+  'model-lab': { skin:'#5c3a1e', hair:'#151515', style:'afro',  h:1.05, w:1.08, glasses:true,  pants:'#33304a' },
+  'ai-lab':    { skin:'#e0ac69', hair:'#0d0d0d', style:'long',  h:0.94, w:0.92, glasses:true,  pants:'#22313a' },
+  'venture':   { skin:'#7d4b2a', hair:'#0f0f0f', style:'short', h:1.02, w:1.03, glasses:false, pants:'#1f3d36' },
+  'physicist': { skin:'#d8a47f', hair:'#5a5a5a', style:'short', h:1.04, w:1.0, glasses:true, pants:'#26324a' },
+  'quant':     { skin:'#f3d1b0', hair:'#1c1c1c', style:'short', h:1.01, w:0.98, glasses:true, pants:'#2f3a2c' },
+  'psychologist':{ skin:'#a86b47', hair:'#3b2416', style:'bun', h:0.98, w:0.97, glasses:false, pants:'#3a2f3f' },
+};
+const V = (x,z)=>new THREE.Vector3(x,0,z);
+// work spots, coffee lounge and machine come from the facility (v3/world.js)
+let SPOTS={}, COFFEE=[], MACHINE=null;
+
+// The Grand Master: a fictional client-side coach (not a research agent). Scripted coaching lines only.
+const GM = { id:'grandmaster', name:'Grand Master', role:'Head Coach', color:'#1c3faa', state:'working', activity:'Running the lab and leading workouts',
+  summary:'The Grand Master oversees the whole lab and calls lab-wide workouts every few minutes to keep the team in shape.', next:'Next workout soon', recent:[], noteCount:0 };
+LOOKS['grandmaster'] = { skin:'#e2b48f', hair:'#b9bcc2', style:'side', h:1.06, w:1.06, glasses:false, pants:'#1b2233', coat:'#1b2233', shirt:'#f4f6fa', };
+DEFAULT_AGENTS.unshift({ id:GM.id, name:GM.name, role:GM.role, color:GM.color });
+let agents = DEFAULT_AGENTS.map(a => a.id===GM.id ? GM : ({ ...a, state:'working', activity:'', summary:'', next:'', recent:[], noteCount:0 }));
+let live = false, root = '';
+const agentOf = id => agents.find(a=>a.id===id);
+const short = id => agentOf(id)?.name || id;
+const rand = (a,b)=>a+Math.random()*(b-a);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const lerp = (a,b,t)=>a+(b-a)*t;
+const damp = (a,b,k,dt)=>lerp(a,b,1-Math.exp(-k*dt));
+const angDiff = (a,b)=>Math.atan2(Math.sin(b-a),Math.cos(b-a));
+
+// ============================================================ renderer
+const app = document.getElementById('app');
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+app.appendChild(renderer.domElement);
+const labels = new CSS2DRenderer();
+labels.setSize(innerWidth, innerHeight);
+Object.assign(labels.domElement.style, { position:'absolute', top:'0', left:'0', pointerEvents:'none' });
+app.appendChild(labels.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#0d121c');
+scene.fog = new THREE.Fog('#0d121c', 70, 150);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 200);
+camera.position.set(0, 42, 38);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.8, 0);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI/2.1;
+controls.minDistance = 4; controls.maxDistance = 95;
+
+scene.add(new THREE.HemisphereLight('#dfe8ff', '#2a2420', 0.55));
+const sun = new THREE.DirectionalLight('#fff4e6', 1.6);
+sun.position.set(-6, 16, 9); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004; sun.shadow.radius = 4;
+Object.assign(sun.shadow.camera, { left:-18, right:18, top:14, bottom:-14 });
+scene.add(sun);
+
+// ============================================================ helpers
+const mat = (c, o={}) => new THREE.MeshStandardMaterial({ color:c, roughness:.65, metalness:.05, ...o });
+function add(geo, m, x=0,y=0,z=0, parent=scene){ const mesh=new THREE.Mesh(geo, m); mesh.position.set(x,y,z); mesh.castShadow=mesh.receiveShadow=true; parent.add(mesh); return mesh; }
+const box=(w,h,d,c,x,y,z,o,p)=>add(new THREE.BoxGeometry(w,h,d), mat(c,o), x,y,z,p);
+const cyl=(rt,rb,h,c,x,y,z,o,p,seg=24)=>add(new THREE.CylinderGeometry(rt,rb,h,seg), mat(c,o), x,y,z,p);
+function table(x,z,w,d,c='#5b4a3a',ry=0){ const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=ry; scene.add(g);
+  box(w,.06,d,c,0,.84,0,{roughness:.5},g); for(const [dx,dz] of [[-1,-1],[1,-1],[-1,1],[1,1]]) cyl(.03,.03,.82,'#2a2f3a',dx*(w/2-.08),.41,dz*(d/2-.08),{metalness:.6,roughness:.3},g,10); return g; }
+function chair(x,z,face){ const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=face; scene.add(g);
+  cyl(.03,.03,.4,'#222',0,.22,0,{metalness:.7},g,8); cyl(.26,.26,.03,'#222',0,.03,0,{metalness:.6},g,5);
+  box(.48,.07,.46,'#2c3346',0,.46,-.02,{},g); box(.46,.5,.06,'#2c3346',0,.78,-.27,{},g); return g; }
+function screen(w,h,x,y,z,ry,c){ const g=new THREE.Group(); g.position.set(x,y,z); g.rotation.y=ry; scene.add(g);
+  box(w,h,.04,'#111',0,0,0,{roughness:.3,metalness:.4},g); box(.05,.25,.05,'#222',0,-h/2-.12,-.02,{},g);
+  const f=add(new THREE.PlaneGeometry(w*.94,h*.9), new THREE.MeshStandardMaterial({color:c, emissive:c, emissiveIntensity:.8}),0,0,.022,g); f.castShadow=false; return f; }
+function plant(x,z,s=1){ cyl(.22*s,.17*s,.4*s,'#b5651d',x,.2*s,z); const f=add(new THREE.IcosahedronGeometry(.45*s,1), mat('#3f7d3a',{flatShading:true,roughness:.9}), x,.75*s,z); f.scale.y=1.2; add(new THREE.IcosahedronGeometry(.3*s,1), mat('#4f9a47',{flatShading:true}), x+.2*s,1.05*s,z-.1*s); }
+function canvasBoard(w,h,x,y,z,ry){ const cv=document.createElement('canvas'); cv.width=1024; cv.height=Math.round(1024*h/w);
+  const tex=new THREE.CanvasTexture(cv); tex.colorSpace=THREE.SRGBColorSpace; tex.anisotropy=8;
+  const m=add(new THREE.PlaneGeometry(w,h), new THREE.MeshStandardMaterial({map:tex, roughness:.85}), x,y,z); m.rotation.y=ry; m.castShadow=false;
+  const fr=box(w+.1,h+.1,.04,'#c9ced8',x-Math.sin(ry)*.025,y,z-Math.cos(ry)*.025,{metalness:.5,roughness:.3}); fr.rotation.y=ry; return {cv,tex}; }
+function wrap(g,t,max){ const out=[]; let line=''; for(const w of String(t).split(/\s+/)){ const tl=line?line+' '+w:w; if(g.measureText(tl).width>max&&line){out.push(line); line=w;} else line=tl; } if(line) out.push(line); return out; }
+function handwriting(board,title,accent,lines){ const {cv,tex}=board; const g=cv.getContext('2d');
+  g.fillStyle='#f7f8fb'; g.fillRect(0,0,cv.width,cv.height);
+  g.fillStyle=accent; g.font='bold 46px "Marker Felt","Comic Sans MS",cursive'; g.fillText(title,30,62);
+  g.strokeStyle=accent; g.lineWidth=3; g.beginPath(); g.moveTo(30,76); g.lineTo(30+g.measureText(title).width,80); g.stroke();
+  let y=128; for(const [lab,txt,col] of lines){ g.fillStyle=col||'#223'; g.font='bold 27px "Marker Felt","Comic Sans MS",cursive'; g.fillText(lab,30,y);
+    g.fillStyle='#2b3140'; g.font='24px "Marker Felt","Comic Sans MS",cursive'; for(const ln of wrap(g,txt||'',cv.width-80).slice(0,2)){ if(!ln) continue; y+=30; g.fillText(ln,46,y);} y+=42; if(y>cv.height-30) break; }
+  tex.needsUpdate=true; }
+
+// ============================================================ facility (v3)
+const world = buildWorld({ THREE, scene, add, mat, box, cyl, table, chair, screen, plant, canvasBoard, handwriting, CSS2DObject, sun });
+({ SPOTS, COFFEE, MACHINE } = world);
+const V0=(x,z)=>new THREE.Vector3(x,0,z);
+SPOTS['grandmaster'] = [ {p:V0(0,4.9),face:Math.PI,pose:'coach',act:'Overseeing the lab'}, {p:V0(-5.8,-0.9),face:Math.PI,pose:'inspect',act:"Checking in at the Director's office"},
+  {p:V0(7.6,0),face:Math.PI/2,pose:'inspect',act:'Inspecting the Observatory wing'}, {p:V0(-7.6,0),face:-Math.PI/2,pose:'inspect',act:'Inspecting the Mind Lab wing'}, {p:V0(0,-4.6),face:Math.PI,pose:'inspect',act:'Reviewing the Venture War Room'} ];
+const WORKOUT_SPOTS = []; for (const z of [3.5,2.0]) for (const x of [-3.6,-1.8,0,1.8,3.6]) if (!(z===2.0 && Math.abs(x)<1)) WORKOUT_SPOTS.push(V0(x,z));
+const EXERCISES = [ ['jacks','Jumping jacks! Twenty, let\'s go!'], ['squats','Squats! Chest up, sit back.'], ['circles','Arm circles. Big and slow.'], ['toes','Toe touches. Keep your knees soft.'] ];
+const workout = { active:false, ex:'jacks', t:0, next:75, idx:0, members:new Set() };
+const missionBoard = world.missionBoard, radarBoard = world.radarBoard;
+
+// ============================================================ people
+function capsule(r,len,m,parent,y){ return add(new THREE.CapsuleGeometry(r,len,6,12), m, 0,y,0,parent); }
+function makeScientist(a){
+  const rig = makePerson({ THREE, scene, add, mat, CSS2DObject }, a, LOOKS[a.id]);
+  return { id:a.id, ...rig,
+    mode:'work', spot:null, path:[], speed:0, maxSpeed:rand(1.05,1.35), phase:Math.random()*6, timer:rand(2,8), sit:0, sitTarget:0,
+    micro:null, microT:rand(4,10), blinkT:rand(1,4), lookAt:null, talk:null, bubbleT:0, coffee:0, hasMug:false, yawTarget:0 };
+}
+
+const sci = {};
+DEFAULT_AGENTS.forEach(a=>{ const s=makeScientist(a); const sp=SPOTS[a.id][a.id==='historian'?1:0]; s.root.position.copy(sp.p); s.root.rotation.y=sp.face; s.spot=sp; s.sit=s.sitTarget=sp.pose==='sit'?1:0; sci[a.id]=s; });
+const all = ()=>Object.values(sci);
+window.__lab = { sci, look(px,py,pz,tx,ty,tz){ camera.position.set(px,py,pz); controls.target.set(tx,ty,tz); controls.update(); renderer.render(scene,camera); labels.render(scene,camera); }, setState(id,st,act){ const a=agentOf(id); a.state=st; a.activity=act||a.activity; chooseNext(sci[id]); }, get agents(){ return agents; }, step(sec){ let t=performance.now()/1000; for(let i=0;i<sec*30;i++){ t+=1/30; workoutTick(1/30); for(const s of all()) update(s,1/30,t); } renderer.render(scene,camera); labels.render(scene,camera); } };
+
+// ============================================================ speech
+function say(s, text, secs=3.6){ s.bubEl.textContent=text; s.bubEl.classList.add('show'); s.bubbleT=secs; }
+const topic = a => a.activity?.replace(/^Done:\s*/,'') || a.recent?.[0]?.title || a.next || 'the backlog';
+const lastNote = a => a.recent?.[0]?.title;
+function conversation(i, p){
+  const A=agentOf(i.id), B=agentOf(p.id);
+  if(i.id==='director') return [
+    [i, `Hey ${B.name.split(' ')[1]}, how's it going with ${clip(topic(B),38)}?`],
+    [p, lastNote(B) ? `Good. "${clip(lastNote(B),34)}" is written up and sourced.` : `Getting there. Still pulling sources.`],
+    [i, pick([`Make sure every connection has a backing link.`, `Nice. That goes on the board for next cycle.`, `Send it my way when it's ready for review.`])],
+    [p, pick([`Will do.`, `On it.`, `Yep, linking it now.`])] ];
+  const lines = [
+    [i, pick([`Got a sec? I'm on ${clip(topic(A),36)}.`, `Coffee's fresh. What are you working on?`, `Quick question about your notes.`])],
+    [p, lastNote(B) ? pick([`Just wrapped "${clip(lastNote(B),34)}".`, `Finishing up ${clip(topic(B),36)}.`]) : `Still early, mostly reading.`],
+    [i, pick([`That could link to my ${clip(lastNote(A)||'work',28)} note.`, `Dr. Okafor should model that.`, `Ha, same problem on my end.`, `Interesting. Got a source for that?`])],
+    [p, pick([`Good call, I'll add the link.`, `Yeah, I'll send it over.`, `I'll cite it properly.`, `Let's bring it up with Dr. Vale.`])] ];
+  return lines;
+}
+const clip = (t,n)=> !t ? '' : (t.length>n ? t.slice(0,n-1)+'…' : t);
+
+// ============================================================ behaviour
+function approach(sp){ const f=V(Math.sin(sp.face),Math.cos(sp.face)); return sp.p.clone().addScaledVector(f,-1.0); }
+function planPath(s, dest, destSpot){
+  const pts=[];
+  if(s.spot && s.mode!=='walk' && s.spot.pose && s.spot.pose!=='coffee' && s.spot.pose!=='machine') pts.push(approach(s.spot));
+  const start = pts.length ? pts[0] : s.root.position.clone();
+  const end = destSpot ? approach(destSpot) : dest.clone();
+  for (const w of world.route(start, end)) pts.push(w);
+  pts.push(end); if(destSpot) pts.push(destSpot.p.clone());
+  s.path=pts.map(p=>{ p=p.clone(); p.y=0; return p; });
+}
+function goTo(s, spot, opts={}){ planPath(s, spot.p, spot.pose&&spot.pose!=='coffee'&&spot.pose!=='machine'?spot:null); s.sitTarget=0; s.mode='walk'; s.nextSpot=spot; s.onArrive=opts.onArrive||null; s.micro=null; s.clip.visible=false; }
+function startWork(s, spot){ if(spot.pose==='workout'){ s.spot=spot; s.mode='work'; s.sitTarget=0; s.timer=1e9; s.yawTarget=spot.face; s.hasMug=false; return; }
+  s.spot=spot; s.mode='work'; s.sitTarget=spot.pose==='sit'?1:0; s.timer=spot.pose==='machine'?6:spot.pose==='coffee'?rand(14,26):rand(14,32); s.timerStart=s.timer; s.yawTarget=spot.face;
+  const a=agentOf(s.id); if(Math.random()<.35 && spot.pose!=='coffee' && spot.pose!=='machine') say(s, a.state==='working' && a.activity ? clip(a.activity,60) : spot.act, 3.2); }
+function taken(s,p){ return all().some(o=>o!==s && ((o.mode!=='walk' && o.spot?.p?.distanceTo(p)<.9) || (o.mode==='walk' && (o.nextSpot?.p?.distanceTo(p)<.9 || o.path?.at(-1)?.distanceTo(p)<.9)) || o.root.position.distanceTo(p)<.6)); }
+function chooseNext(s){
+  if (s.id==='grandmaster') { const sp = workout.active ? SPOTS.grandmaster[0] : pick(SPOTS.grandmaster.filter(o=>o!==s.spot)); return goTo(s, sp); }
+  if (workout.active && workout.members.has(s.id)) return;
+  if(s.talk){ const o=s.talk.with; if(o?.talk?.with===s){ o.talk=null; o.lookAt=null; if(o.mode==='talk'){ o.mode='work'; o.timer=Math.max(o.timer||0,3); } } s.talk=null; s.lookAt=null; }
+  const a=agentOf(s.id);
+  if(a.state==='idle' && s.hasMug && Math.random()<.35){ const target=pick(all().filter(o=>o!==s && o.id!=='grandmaster' && o.mode==='work' && !o.talk && !workout.members.has(o.id) && o.spot?.pose!=='sit')); if(target) return startChat(s,target); }
+  if(a.state==='idle'){
+    const mspot=[MACHINE.clone().add(V(0,-.7)), MACHINE.clone().add(V(.9,-.7)), MACHINE.clone().add(V(1.8,-.7))].find(p=>!taken(s,p));
+    if(!s.hasMug && mspot && Math.random()<.7){ return goTo(s,{p:mspot, face:0, pose:'machine', act:'Making coffee'}); }
+    const free=COFFEE.filter(p=>!taken(s,p)); const p=pick(free.length?free:COFFEE);
+    const ctr = p.x>0 ? V(5.2,2.7) : V(-5,3.7);
+    return goTo(s,{p:p.clone(), face:Math.atan2(ctr.x-p.x, ctr.z-p.z), pose:'coffee', act:'Coffee break'}); }
+  if(s.id==='director' && Math.random()<.5){ const target=pick(all().filter(o=>o.id!=='director' && o.id!=='grandmaster' && o.mode!=='walk' && !o.talk && !workout.members.has(o.id))); if(target) return startChat(s,target); }
+  if(Math.random()<(a.state==='idle'?.35:.12)){ const target=pick(all().filter(o=>o!==s && o.id!=='grandmaster' && o.mode==='work' && !o.talk && !workout.members.has(o.id) && o.spot?.pose!=='sit')); if(target) return startChat(s,target); }
+  const opts=SPOTS[s.id].filter(o=>o!==s.spot && !taken(s,o.p)); goTo(s, pick(opts)||SPOTS[s.id].find(o=>o!==s.spot)||SPOTS[s.id][0]);
+}
+function startChat(i, p){
+  const toI=i.root.position.clone().sub(p.root.position); toI.y=0; if(toI.lengthSq()<1e-4) toI.set(0,0,1);
+  const side=V(Math.cos(p.root.rotation.y),-Math.sin(p.root.rotation.y)); // partner's right
+  const pr=world.regionOf(p.root.position); let stand=null;
+  for (const dir of [p.spot?.pose==='sit'?side:toI.normalize(), side.clone().negate(), toI.clone().normalize(), V(Math.sin(p.root.rotation.y),Math.cos(p.root.rotation.y))]) { const c=p.root.position.clone().addScaledVector(dir,1.0); if(world.regionOf(c)===pr){ stand=c; break; } }
+  if(!stand) stand=p.root.position.clone().add(V(.8,.8));
+  i.talk={ with:p, lines:null, idx:0, t:0 }; p.talk={ with:i, passive:true };
+  goTo(i,{p:stand, face:Math.atan2(p.root.position.x-stand.x, p.root.position.z-stand.z), pose:null, act:'Talking'}, { onArrive:()=>{
+    if(!i.talk || i.talk.with!==p || p.talk?.with!==i){ i.talk=null; return chooseNext(i); }
+    i.mode='talk'; i.talk.lines=conversation(i,p); i.talk.idx=0; i.talk.t=.3; p.lookAt=i; i.lookAt=p;
+    if(p.spot?.pose!=='sit' && p.mode!=='walk'){ p.mode='talk'; p.yawTarget=Math.atan2(stand.x-p.root.position.x, stand.z-p.root.position.z); } } });
+}
+function endChat(i){ const p=i.talk?.with; i.talk=null; i.lookAt=null; if(p){ p.talk=null; p.lookAt=null; if(p.mode==='talk'){ p.mode='work'; p.yawTarget=p.spot?.face??p.root.rotation.y; p.timer=Math.max(p.timer,4); } } chooseNext(i); }
+
+// ============================================================ workouts (the Grand Master gets everyone into shape)
+function workoutTick(dt){
+  const gm=sci.grandmaster; if(!gm) return;
+  if(!workout.active){ workout.next-=dt;
+    if(workout.next<=0){ const team=all().filter(s=>s.id!=='grandmaster' && agentOf(s.id)?.state!=='working' && !s.talk);
+      if(team.length<2){ workout.next=30; return; }
+      workout.active=true; workout.t=0; workout.idx=0; workout.ex=EXERCISES[0][0]; workout.members=new Set(team.map(s=>s.id));
+      goTo(gm, SPOTS.grandmaster[0]); say(gm,'Everyone to the atrium. Workout time!',4); GM.activity='Leading a lab-wide workout';
+      team.forEach((s,i)=>{ const p=WORKOUT_SPOTS[i%WORKOUT_SPOTS.length]; goTo(s,{p:p.clone(),face:0,pose:'workout',act:'Working out'}); }); }
+    return; }
+  workout.t+=dt; const phase=Math.floor(workout.t/12);
+  if(phase!==workout.idx && phase<EXERCISES.length){ workout.idx=phase; workout.ex=EXERCISES[phase][0]; say(gm,EXERCISES[phase][1],3.5); }
+  else if(workout.t<1) say(gm,EXERCISES[0][1],3.5);
+  if(phase>=EXERCISES.length){ workout.active=false; workout.next=rand(150,240); say(gm,'Good work, team. Hydrate and back to it!',4); GM.activity='Running the lab and leading workouts';
+    const ids=[...workout.members]; workout.members.clear(); ids.forEach(id=>{ const s=sci[id]; if(s){ s.timer=0; chooseNext(s); } }); chooseNext(gm); }
+}
+
+// ============================================================ animation
+const tmp=new THREE.Vector3();
+function update(s, dt, t){
+  const a=agentOf(s.id); const pos=s.root.position;
+  // ---------- locomotion
+  if(s.mode==='walk'){
+    const target=s.path[0]; tmp.copy(target).sub(pos); tmp.y=0; const dist=tmp.length();
+    const want=Math.atan2(tmp.x,tmp.z); const turn=angDiff(s.root.rotation.y,want);
+    s.root.rotation.y+=turn*Math.min(1,dt*7);
+    const facing = Math.abs(turn)<0.9;
+    const remaining = dist + (s.path.length>1? 1.5 : 0);
+    const top = facing ? Math.min(s.maxSpeed, .45+remaining*.9) : .15;
+    s.speed = damp(s.speed, top, 4, dt);
+    if(dist < Math.max(.06, s.speed*dt*1.2)){ s.path.shift(); if(!s.path.length){ pos.copy(target); s.speed=0; const sp=s.nextSpot; if(s.onArrive){ const f=s.onArrive; s.onArrive=null; s.spot=sp; s.yawTarget=sp.face; f(); } else startWork(s, sp); } }
+    else {
+      tmp.normalize();
+      // steering: curve around nearby people, yield to whoever is right in front
+      const steer=new THREE.Vector3(); let yieldTo=false;
+      for (const o of all()) { if (o===s) continue; const off=pos.clone().sub(o.root.position); off.y=0; const d=off.length(); if (d>1.4 || d<1e-4) continue;
+        const ahead=-off.dot(tmp)/d;                       // >0 means o is in front of us
+        if (ahead>.2) steer.addScaledVector(off.normalize(), (1.4-d)/1.4 * (1+ahead));
+        if (ahead>.75 && d<.95 && (o.mode!=='walk' || o.id<s.id)) yieldTo=true; }
+      if (steer.lengthSq()>0) { const side=new THREE.Vector3(-tmp.z,0,tmp.x); if (side.dot(steer)<0) side.negate(); tmp.addScaledVector(side, Math.min(1.2, steer.length())).normalize(); }
+      pos.addScaledVector(tmp, s.speed*dt*(yieldTo?.35:1));
+    }
+  } else { s.speed=damp(s.speed,0,6,dt); s.root.rotation.y+=angDiff(s.root.rotation.y, s.yawTarget??s.root.rotation.y)*Math.min(1,dt*4); }
+
+  // ---------- personal space: walkers sidestep, standing people shuffle apart, seated people stay put
+  if (s.sit < .3) {
+    for (const o of all()) { if (o===s) continue; tmp.copy(pos).sub(o.root.position); tmp.y=0; const d=tmp.length(); const R = (s.mode==='walk'||o.mode==='walk') ? .8 : .7;
+      if (d<R && d>1e-4) { const push=(R-d)*(o.sit>.5?1:.5)*Math.min(1,dt*(s.mode==='walk'?6:3)); pos.addScaledVector(tmp.normalize(), push);
+        if (s.mode==='walk') { const side=tmp.set(-tmp.z,0,tmp.x); pos.addScaledVector(side, push*.6); } }
+      else if (d<=1e-4) pos.x+=.05; }
+  }
+
+  for (const o of all()) { if (o===s) continue; const off=pos.clone().sub(o.root.position); off.y=0; const d=off.length(); const MIN=.55;
+    if (d<MIN) { if (d<1e-4) off.set(Math.random()-.5,0,Math.random()-.5); off.normalize(); const fix=MIN-d;
+      if (o.sit>.5 && s.sit<=.5) pos.addScaledVector(off, fix); else if (s.sit<=.5) { pos.addScaledVector(off, fix/2); o.root.position.addScaledVector(off, -fix/2); } } }
+
+  // ---------- sit blend
+  s.sit=damp(s.sit, s.sitTarget, 5, dt);
+  const sit=s.sit, walkAmt=Math.min(1,s.speed/1.0);
+  s.phase += dt * (1.6 + s.speed*4.6);
+  const ph=s.phase, sw=Math.sin(ph);
+  const breathe=Math.sin(t*1.6+s.maxSpeed*10)*.012;
+
+  // legs
+  const kneeL = .06 + Math.max(0,-Math.cos(ph))**1.5*.62, kneeR = .06 + Math.max(0,Math.cos(ph))**1.5*.62;
+  s.legL.thigh.rotation.x = lerp(lerp(0, sw*.42, walkAmt), -1.5, sit);
+  s.legR.thigh.rotation.x = lerp(lerp(0,-sw*.42, walkAmt), -1.5, sit);
+  s.legL.knee.rotation.x  = lerp(lerp(.03, kneeL, walkAmt), 1.5, sit);
+  s.legR.knee.rotation.x  = lerp(lerp(.03, kneeR, walkAmt), 1.5, sit);
+  s.hips.position.y = lerp(.92 - walkAmt*.02 + Math.cos(ph*2)*.022*walkAmt, .52, sit);
+  s.hips.position.z = lerp(0, -.12, sit);
+  { const inW = workout.active && (s.spot?.pose==='workout' || (s.id==='grandmaster' && s.spot?.pose==='coach')) && s.mode!=='walk'; const ex=workout.ex, w=(Math.sin(t*5.5)+1)/2;
+    const spread = inW && ex==='jacks' ? w*.32 : 0; s.legL.thigh.rotation.z=damp(s.legL.thigh.rotation.z,-spread,12,dt); s.legR.thigh.rotation.z=damp(s.legR.thigh.rotation.z,spread,12,dt);
+    if (inW && ex==='squats') { const q=(Math.sin(t*2.6)+1)/2; s.hips.position.y=.92-q*.36; s.legL.thigh.rotation.x=s.legR.thigh.rotation.x=-q*1.25; s.legL.knee.rotation.x=s.legR.knee.rotation.x=q*1.55; s.legL.ankle.rotation.x=s.legR.ankle.rotation.x=-q*.3; }
+    if (inW && ex==='jacks') s.hips.position.y=.92+w*.05; }
+  s.legL.ankle.rotation.x = lerp(walkAmt*(sw>0? sw*.45 : sw*.3), .05, sit);
+  s.legR.ankle.rotation.x = lerp(walkAmt*(-sw>0? -sw*.45 : -sw*.3), .05, sit);
+  s.hips.rotation.y = sw*.1*walkAmt;
+  s.skirt.rotation.x = lerp(-.05*walkAmt + Math.sin(ph*2)*.035*walkAmt, -1.25, sit);
+  s.skirt.scale.y = lerp(1, .55, sit);
+  s.hips.rotation.z = Math.sin(ph)*.04*walkAmt + (s.mode!=='walk'&&!sit? Math.sin(t*.35+s.maxSpeed*7)*.025 : 0);
+  s.spine.rotation.y = -sw*.17*walkAmt;
+  s.spine.rotation.x = lerp(.04*walkAmt, .12, sit) + breathe;
+  s.spine.scale.set(1+breathe*.5,1,1+breathe);
+
+  // arms: base walk swing
+  let aLx=-sw*.45*walkAmt, aRx=sw*.45*walkAmt, eL=-.25-.2*walkAmt, eR=-.25-.2*walkAmt, aLz=.06, aRz=-.06;
+  const pose = s.mode==='work' ? s.spot?.pose : (s.mode==='talk' ? 'talk' : null);
+  const k=(x)=>x*(1-walkAmt);
+  if(pose==='sit'){ const ty=Math.sin(t*14), ty2=Math.sin(t*13+1.3); aLx=k(-.45); aRx=k(-.45); eL=k(-1.05+ty*.06); eR=k(-1.05+ty2*.06); aLz=.18; aRz=-.18; }
+  else if(pose==='board'){ const w=t*2.2; aRx=k(-2.1+Math.sin(w)*.12); aRz=-.25+Math.cos(w)*.08; eR=k(-.5); aLx=k(-.2); eL=k(-.8); }
+  else if(pose==='shelf'){ const reach=(Math.sin(t*.6)+1)/2; aRx=k(-1.2-reach*1.1); eR=k(-.3); aLx=k(-.5); eL=k(-1.3); }
+  else if(pose==='tinker'||pose==='holo'){ aLx=k(-.7+Math.sin(t*3)*.08); aRx=k(-.8+Math.sin(t*2.6+1)*.1); eL=k(-.9); eR=k(-.8); aLz=.15; aRz=-.15; s.spine.rotation.x+=.18*(1-walkAmt); }
+  else if(pose==='inspect'){ aRx=k(-1.4+Math.sin(t*1.5)*.1); eR=k(-.4); aLx=k(-.1); eL=k(-.3); }
+  else if(pose==='talk'){ const g=s.talk && !s.talk.passive && s.bubbleT>0 ? 1:0, g2=s.talk?.passive && s.bubbleT>0 ? 1:0; const gg=Math.max(g,g2);
+    aRx=k(-.35-gg*(.5+Math.sin(t*3.2)*.25)); eR=k(-.6-gg*.5); aLx=k(-.15); eL=k(-.35); }
+  else if(pose==='coffee'||pose==='machine'){ aLx=k(-.1); eL=k(-.25); }
+  else if((pose==='workout' || pose==='coach') && workout.active){ const w=(Math.sin(t*5.5)+1)/2;
+    if(workout.ex==='jacks'){ aLx=0; aRx=0; aLz=.15+w*2.7; aRz=-(.15+w*2.7); eL=eR=-.1; }
+    else if(workout.ex==='squats'){ const q=(Math.sin(t*2.6)+1)/2; aLx=aRx=-1.5*q-.1; eL=eR=-.1; aLz=.15; aRz=-.15; }
+    else if(workout.ex==='circles'){ aLz=1.5; aRz=-1.5; aLx=Math.sin(t*5)*.55; aRx=Math.sin(t*5)*.55; eL=eR=0; }
+    else if(workout.ex==='toes'){ const q=(Math.sin(t*2.2)+1)/2; s.spine.rotation.x+=q*1.15; aLx=aRx=-.9*q; eL=eR=-.1; } }
+  else if(pose==='coach'){ aLx=k(-.15); aRx=k(-.15); eL=eR=k(-.3); aLz=.12; aRz=-.12; }
+  // micro actions while working (stretch, scratch head, clipboard)
+  s.microT-=dt; if(s.microT<=0 && s.mode==='work' && pose!=='workout' && pose!=='coach'){ s.micro={type:pick(['stretch','scratch','look','clipboard']), t:0, dur:rand(1.8,3.2)}; s.microT=rand(7,16); }
+  if(s.micro){ s.micro.t+=dt; const m=s.micro, u=Math.sin(Math.min(1,m.t/m.dur)*Math.PI);
+    if(s.mode!=='work'){ s.micro=null; }
+    else if(m.type==='stretch' && pose!=='board'){ aLx=lerp(aLx,-2.9,u); aRx=lerp(aRx,-2.9,u); eL=lerp(eL,-.2,u); eR=lerp(eR,-.2,u); s.spine.rotation.x-=.1*u; }
+    else if(m.type==='scratch'){ aRx=lerp(aRx,-2.4,u); eR=lerp(eR,-1.9,u); aRz=lerp(aRz,-.6,u); }
+    else if(m.type==='clipboard' && pose!=='sit'){ s.clip.visible=u>.15; aLx=lerp(aLx,-.9,u); eL=lerp(eL,-1.2,u); }
+    if(m.t>=m.dur){ s.micro=null; s.clip.visible=false; } }
+  // coffee: hold & sip
+  s.mug.visible=s.hasMug;
+  if(s.hasMug && s.mode!=='walk'){ const sip=Math.max(0,Math.sin(t*.9+s.maxSpeed*4))**8; aRx=lerp(-.5,-1.4,sip); eR=lerp(-1.3,-1.9,sip); aRz=-.1; }
+  else if(s.hasMug){ eR=-1.2; aRx=-.3; }
+  s.armL.sh.rotation.set(aLx,0,aLz); s.armR.sh.rotation.set(aRx,0,aRz); s.armL.el.rotation.x=eL; s.armR.el.rotation.x=eR;
+
+  // ---------- head: look at partner / screen / idle glances
+  let yaw=0, pitch = pose==='sit'? .2 : (pose==='tinker'||pose==='holo')? .35 : pose==='shelf'? -.15 : 0;
+  if(s.lookAt){ tmp.copy(s.lookAt.root.position).sub(pos); const want=Math.atan2(tmp.x,tmp.z); yaw=Math.max(-1.1,Math.min(1.1,angDiff(s.root.rotation.y,want))); pitch=0; }
+  else if(s.micro?.type==='look' || pose==='coffee'){ yaw=Math.sin(t*.5+s.maxSpeed*5)*.7; }
+  else if(s.mode==='walk'){ yaw=Math.sin(t*.7+s.maxSpeed*3)*.15; }
+  s.neck.rotation.y=damp(s.neck.rotation.y,yaw,6,dt); s.head.rotation.x=damp(s.head.rotation.x,pitch,5,dt);
+  // blink, brows, mouth
+  s.blinkT-=dt; const blink = s.blinkT<0 ? 1 : 0; if(s.blinkT<-.12) s.blinkT=rand(2,5.5);
+  for(const l of s.lids) l.scale.y = blink ? 1.05 : .05;
+  const talking = s.bubbleT>0 && s.talk; s.lowerLip.position.y = s.lowerLip.userData.baseY - (talking? Math.abs(Math.sin(t*13))*.012 : 0);
+  const curl = s.hasMug ? 1.3 : (pose==='sit' ? .55+Math.sin(t*14)*.15 : .25);
+  for(const f of s.armR.fingers) f.rotation.x = damp(f.rotation.x, curl, 8, dt);
+  for(const f of s.armL.fingers) f.rotation.x = damp(f.rotation.x, pose==='sit' ? .55+Math.sin(t*13+1)*.15 : (s.clip.visible?1.1:.25), 8, dt);
+  for(const b of s.brows) b.position.y = .058 + (talking? Math.sin(t*5)*.004:0);
+
+  // ---------- state timers
+  if(s.mode==='work'){ s.timer-=dt;
+    if(s.spot?.pose==='machine' && s.timer<s.timerStart-4){ s.hasMug=true; }
+    if(s.timer<=0 && !s.talk){ chooseNext(s); }
+  }
+  if(s.mode==='talk' && s.talk && !s.talk.passive){
+    s.talk.t-=dt;
+    if(s.talk.t<=0){ const L=s.talk.lines; if(s.talk.idx>=L.length){ endChat(s); }
+      else { const [who,text]=L[s.talk.idx++]; say(who,text,3.4); s.talk.t=3.6; } }
+  }
+  if(s.bubbleT>0){ s.bubbleT-=dt; if(s.bubbleT<=0) s.bubEl.classList.remove('show'); }
+}
+
+// ============================================================ UI
+const $=id=>document.getElementById(id);
+const panel=$('panel'); let selected=null, following=false; const chats={};
+function renderRoster(){
+  $('roster').innerHTML = agents.map(a=>`<div class="chip ${a.id===selected?'sel':''}" data-id="${a.id}"><span class="dot" style="background:${a.color}"></span>${a.name}<small>${a.role} · ${a.state}</small></div>`).join('');
+  $('roster').querySelectorAll('.chip').forEach(c=>c.onclick=()=>select(c.dataset.id));
+}
+function esc(t){ return String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function doingNow(a){ const s=sci[a.id];
+  if(s.mode==='talk'||s.talk) return `Talking with ${short(s.talk?.with?.id)}`;
+  if(s.mode==='walk') return s.nextSpot?.act ? `Heading over: ${s.nextSpot.act.toLowerCase()}` : 'Walking';
+  if(a.state==='idle') return s.hasMug ? 'On a coffee break' : 'Between tasks';
+  return a.activity || s.spot?.act || 'Working'; }
+function renderPanel(){
+  if(!selected) return; const a=agentOf(selected);
+  $('pAv').style.background=a.color; $('pAv').textContent=a.name.split(' ').pop()[0];
+  $('pName').textContent=a.name; $('pRole').textContent=a.role;
+  $('pState').className='state '+a.state; $('pState').textContent=a.state;
+  $('pNow').textContent = doingNow(a) + (a.activity && a.state!=='working' ? ` · last task: ${a.activity.replace(/^Done:\s*/,'')}` : '');
+  $('pSum').textContent = a.summary || (live?'Writing summary…':'Start the lab server to get live AI summaries.');
+  $('pUpd').textContent = a.refreshing ? '● updating' : '';
+  $('pNext').textContent = a.next || '—';
+  $('pCount').textContent = a.noteCount||0;
+  $('pRecent').innerHTML = (a.recent||[]).map(r=>`<a href="obsidian://open?path=${encodeURIComponent(root+'/'+r.path)}" title="Open in Obsidian">${esc(r.title)}</a>`).join('') || '<p style="color:var(--muted)">No notes yet.</p>';
+}
+function renderChat(){
+  const list=chats[selected]||[];
+  $('msgs').innerHTML = list.length ? list.map(m=>`<div class="m ${m.role==='user'?'you':m.role==='system'?'sys':'them'}">${esc(m.content)}</div>`).join('')
+    : `<div class="m sys">Say hi to ${esc(agentOf(selected).name)}${live?'':' (chat needs the lab server + Forge AI)'}.</div>`;
+  $('msgs').scrollTop=1e9;
+}
+function select(id){ if(selected) sci[selected].ring.visible=false; selected=id; sci[id].ring.visible=true; panel.classList.add('open'); renderPanel(); renderChat(); renderRoster(); following=true; setTimeout(()=>$('inp').focus(),250); }
+$('pClose').onclick=()=>{ if(selected) sci[selected].ring.visible=false; selected=null; following=false; panel.classList.remove('open'); renderRoster(); };
+$('form').onsubmit=async e=>{
+  e.preventDefault(); const text=$('inp').value.trim(); if(!text||!selected) return;
+  if(selected==='grandmaster'){ chats[selected]=chats[selected]||[]; chats[selected].push({role:'user',content:text},{role:'system',content:'The Grand Master leads the lab and its workouts. Chat is off for the Grand Master. Ask one of the scientists instead.'}); $('inp').value=''; renderChat(); return; }
+  const id=selected, s=sci[id]; chats[id]=chats[id]||[]; chats[id].push({role:'user',content:text}); $('inp').value=''; renderChat();
+  const btn=$('sendBtn'); btn.disabled=true; chats[id].push({role:'system',content:`${agentOf(id).name} is typing…`}); renderChat();
+  s.micro=null; s.yawTarget=Math.atan2(camera.position.x-s.root.position.x, camera.position.z-s.root.position.z);
+  try{
+    const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({agent:id,messages:chats[id].filter(m=>m.role!=='system')})});
+    const j=await r.json(); chats[id]=chats[id].filter(m=>m.role!=='system'); chats[id].push(j.reply?{role:'assistant',content:j.reply}:{role:'system',content:j.error||'No reply'});
+    if(j.reply) say(s, clip(j.reply.split(/(?<=[.!?])\s/)[0],80), 4);
+  }catch{ chats[id]=chats[id].filter(m=>m.role!=='system'); chats[id].push({role:'system',content:'Chat is off in the public demo.'}); }
+  btn.disabled=false; if(selected===id) renderChat(); s.yawTarget=s.spot?.face??s.yawTarget;
+};
+function drawBoards(){
+  handwriting(missionBoard,'Mission Board','#b8860b', agents.filter(a=>a.id!=='director').map(a=>[a.name+' · '+a.role, clip(a.next,140), a.color]));
+  const ts=agentOf('tech-scout'); handwriting(radarBoard,'Tech Radar','#138a86', (ts.recent||[]).slice(0,7).map(r=>['• '+r.title,'','#16324a']));
+}
+
+// ============================================================ room navigation
+let flight=null;
+function flyTo(x,z,dist){ following=false; flight={ t:0, fromT:controls.target.clone(), toT:new THREE.Vector3(x,0.8,z), fromP:camera.position.clone(), toP:new THREE.Vector3(x+dist*.25,dist*.95,z+dist*.85) }; }
+$('rooms').innerHTML = '<button data-x="0" data-z="0" data-d="44">🏢 Overview</button>' + world.rooms.map(r=>`<button data-x="${r.c[0]}" data-z="${r.c[1]}" data-d="${r.id==='director'?9:15}">${r.label}</button>`).join('');
+$('rooms').querySelectorAll('button').forEach(b=>b.onclick=()=>flyTo(+b.dataset.x,+b.dataset.z,+b.dataset.d));
+
+// ============================================================ live status
+async function poll(){
+  try{
+    const r=await fetch('/api/status',{cache:'no-store'}); if(!r.ok) throw 0; const j=await r.json();
+    live=true; root=j.root||root; $('banner').style.display='none';
+    const prev=Object.fromEntries(agents.map(a=>[a.id,[a.state,a.activity]]));
+    agents=[GM, ...j.agents];
+    for(const a of agents){ const s=sci[a.id]; if(!s) continue; const [ps,pa]=prev[a.id]||[];
+      if(ps!==a.state && a.state==='working' && workout.members.has(a.id)) workout.members.delete(a.id);
+      if(ps!==a.state){ if(a.state!=='idle') s.hasMug=false; if(!s.talk) chooseNext(s); if(a.state==='working' && a.activity) say(s, clip(a.activity,60), 4); }
+      else if(pa!==a.activity && a.activity && !s.talk){ say(s, a.state==='idle'? `Done! ${clip(a.activity.replace(/^Done:\s*/,''),50)}` : clip(a.activity,60), 4); } }
+    $('aiDot').style.background=j.ai?'#5ad16b':'#e05d5d'; $('aiText').textContent=j.ai?`Forge AI online (${j.model})`:'Forge AI offline: start Ollama';
+    $('sync').textContent='synced '+j.time.slice(11);
+  }catch{ live=false; $('banner').style.display='block'; $('aiDot').style.background='#777'; $('aiText').textContent='Demo mode'; $('sync').textContent='no server'; }
+  renderRoster(); renderPanel(); drawBoards();
+}
+poll(); setInterval(poll, 4000);
+setInterval(()=>{ if(selected) renderPanel(); }, 1000);
+
+// ============================================================ picking
+const ray=new THREE.Raycaster(), mouse=new THREE.Vector2(); let down=null;
+const hits=()=>all().map(s=>s.hit);
+renderer.domElement.addEventListener('pointerdown',e=>{ down=[e.clientX,e.clientY]; });
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5){ following=false; return; }
+  mouse.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); ray.setFromCamera(mouse,camera);
+  const h=ray.intersectObjects(hits()); if(h.length) select(h[0].object.userData.agentId);
+});
+renderer.domElement.addEventListener('pointermove',e=>{ mouse.set(e.clientX/innerWidth*2-1, -(e.clientY/innerHeight)*2+1); ray.setFromCamera(mouse,camera); renderer.domElement.style.cursor = ray.intersectObjects(hits()).length ? 'pointer' : 'grab'; });
+
+// ============================================================ loop
+const clock=new THREE.Clock();
+renderer.setAnimationLoop(()=>{
+  const dt=Math.min(clock.getDelta(),.05), t=clock.elapsedTime;
+  workoutTick(dt);
+  for(const s of all()) update(s,dt,t);
+  if(!document.hidden) world.tick(t,dt);
+  for(const s of all()) if(s.ring.visible) s.ring.material.opacity=.55+Math.sin(t*3)*.3;
+  if(flight){ flight.t=Math.min(1,flight.t+dt*.9); const e=flight.t<.5?2*flight.t*flight.t:1-Math.pow(-2*flight.t+2,2)/2; controls.target.lerpVectors(flight.fromT,flight.toT,e); camera.position.lerpVectors(flight.fromP,flight.toP,e); if(flight.t>=1) flight=null; }
+  if(following&&selected){ const p=sci[selected].root.position; controls.target.lerp(tmp.set(p.x,1,p.z),.05); }
+  controls.update(); renderer.render(scene,camera); labels.render(scene,camera);
+});
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); labels.setSize(innerWidth,innerHeight); });
+</script>
+<div style="position:fixed;bottom:4px;left:50%;transform:translateX(-50%);color:#56607a;font-size:11px;z-index:9;pointer-events:none">© 2026 Miles Gurule · All rights reserved</div>
+</body>
+</html>

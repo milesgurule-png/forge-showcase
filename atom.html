@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vault Atom</title>
+<style>
+  :root { --bg:#05070d; --panel:#0f1522e6; --line:#232c40; --text:#e6ebf5; --muted:#8b95ab; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text); font:13px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; overflow:hidden; }
+  #app { position:fixed; inset:0; }
+  .hud { position:fixed; top:14px; left:16px; z-index:3; pointer-events:none; }
+  .hud h1 { margin:0; font-size:18px; }
+  .hud .sub { color:var(--muted); margin-top:2px; }
+  .stats { margin-top:8px; display:flex; gap:14px; flex-wrap:wrap; }
+  .stat b { display:block; font-size:18px; color:#fff; }
+  .stat span { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.6px; }
+  #legend { position:fixed; left:16px; bottom:16px; z-index:3; display:flex; flex-wrap:wrap; gap:6px; max-width:calc(100% - 32px); }
+  .chip { background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:5px 11px; cursor:pointer; user-select:none; }
+  .chip.off { opacity:.35; }
+  .chip i { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+  #tip { position:fixed; z-index:4; pointer-events:none; background:var(--panel); border:1px solid var(--line); padding:6px 10px; border-radius:8px; display:none; max-width:280px; }
+  #tip small { color:var(--muted); display:block; }
+  .back { position:fixed; top:14px; right:16px; z-index:3; color:var(--text); background:var(--panel); border:1px solid var(--line); padding:7px 12px; border-radius:8px; text-decoration:none; }
+  .help { position:fixed; right:16px; bottom:16px; z-index:2; color:var(--muted); font-size:12px; text-align:right; pointer-events:none; }
+  @media (max-width:640px){ .help{display:none;} }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="app"></div>
+<div class="hud">
+  <h1>⚛️ Vault Atom</h1>
+  <div class="sub">Snapshot of Miles's research vault: each ring is a research domain, each line a cited connection</div>
+  <div class="stats">
+    <div class="stat"><b id="sNotes">–</b><span>notes</span></div>
+    <div class="stat"><b id="sLinks">–</b><span>connections</span></div>
+    <span id="sBonds" hidden></span>
+    <span id="sComp" hidden></span>
+  </div>
+</div>
+<a class="back" href="lab/">← Science Lab</a>
+<div id="legend"></div>
+<div id="tip"></div>
+<div class="help">Drag to rotate · scroll to zoom · hover a node to see its title · click the legend to hide a domain</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const SHELLS = {
+  nucleus: { name:'Nucleus',          color:'#ffd166', r:0,    tilt:[0,0] },
+  history: { name:'History',          color:'#e07a5f', r:7,    tilt:[0.2,0.0] },
+  mind:    { name:'Mind Lab',         color:'#ff7eb6', r:8.5,  tilt:[1.1,0.5] },
+  quant:   { name:'Quant Lab',        color:'#ffa94d', r:10,   tilt:[-0.9,1.2] },
+  tech:    { name:'Tech Radar',       color:'#3dd6d0', r:11.5, tilt:[0.6,2.1] },
+  ai:      { name:'AI Lab',           color:'#5ad16b', r:13,   tilt:[-0.4,2.8] },
+  model:   { name:'Model Lab',        color:'#9b7bff', r:14.5, tilt:[1.4,1.6] },
+  business:{ name:'Forge Digital',    color:'#4dabf7', r:16,   tilt:[-1.2,0.3] },
+  learning:{ name:'Courses',          color:'#94d82d', r:17.5, tilt:[0.9,-0.8] },
+  lab:     { name:'Director & Lab',   color:'#f5c542', r:5,    tilt:[-0.2,1.0] },
+  venture: { name:'Venture Lab',      color:'#20c997', r:3.5,  tilt:[0.5,-0.4] },
+  frontier:{ name:'Frontier Lab',     color:'#74c0fc', r:20.5, tilt:[-0.7,-2.2] },
+  personal:{ name:'Personal',         color:'#adb5bd', r:22,   tilt:[0.3,-1.6] },
+  bond:    { name:'Bonds (500)',      color:'#ffffff', r:-1,   tilt:[0,0] },
+};
+
+const app=document.getElementById('app');
+const renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight); app.appendChild(renderer.domElement);
+const scene=new THREE.Scene(); scene.background=new THREE.Color('#05070d'); scene.fog=new THREE.FogExp2('#05070d',0.012);
+const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,500); camera.position.set(0,14,42);
+const controls=new OrbitControls(camera,renderer.domElement); controls.enableDamping=true; controls.autoRotate=true; controls.autoRotateSpeed=.35;
+scene.add(new THREE.AmbientLight('#ffffff',.6)); const pl=new THREE.PointLight('#ffd166',60,60,1.5); scene.add(pl);
+// starfield
+{ const g=new THREE.BufferGeometry(), p=[]; for(let i=0;i<1500;i++){ const v=new THREE.Vector3().randomDirection().multiplyScalar(80+Math.random()*80); p.push(v.x,v.y,v.z); } g.setAttribute('position',new THREE.Float32BufferAttribute(p,3)); scene.add(new THREE.Points(g,new THREE.PointsMaterial({color:'#5a6a8a',size:.25}))); }
+
+let nodes=[], links=[], meshes=[], linkGeo=null, linkLine=null, rings={}, hidden=new Set(), root='';
+const orbitGroups={};
+function hash(s){ let h=2166136261; for(const c of s) h=Math.imul(h^c.charCodeAt(0),16777619); return (h>>>0)/4294967295; }
+
+function build(data){
+  for(const m of meshes) m.parent.remove(m); meshes=[]; if(linkLine) scene.remove(linkLine);
+  for(const k in orbitGroups){ scene.remove(orbitGroups[k]); delete orbitGroups[k]; }
+  nodes=data.nodes; links=data.links; root=data.root;
+  const deg=new Array(nodes.length).fill(0); for(const [a,b] of links){ deg[a]++; deg[b]++; }
+  const counts={}; nodes.forEach(n=>counts[n.shell]=(counts[n.shell]||0)+1); const idx={};
+  for(const key in SHELLS){ const S=SHELLS[key]; if(S.r<=0) continue;
+    const g=new THREE.Group(); g.rotation.set(S.tilt[0],S.tilt[1],0); scene.add(g); orbitGroups[key]=g;
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(S.r,.025,6,160), new THREE.MeshBasicMaterial({color:S.color,transparent:true,opacity:.35})); ring.rotation.x=Math.PI/2; g.add(ring); rings[key]=ring; }
+  nodes.forEach((n,i)=>{
+    const S=SHELLS[n.shell]||SHELLS.personal; const size=.14+Math.min(.5,Math.sqrt(deg[i])*.06);
+    const mat=new THREE.MeshStandardMaterial({color:S.color, emissive:S.color, emissiveIntensity:n.shell==='nucleus'?1.4:.7, roughness:.4});
+    const m=new THREE.Mesh(new THREE.SphereGeometry(n.shell==='nucleus'?.9:size,14,10), mat); m.userData.i=i; n.mesh=m; n.deg=deg[i];
+    if(n.shell==='nucleus'){ const k=idx.nucleus=(idx.nucleus||0)+1; const v=new THREE.Vector3().randomDirection().multiplyScalar(k===1?0:1.1); m.position.copy(v); scene.add(m); }
+    else if(n.shell==='bond'){ scene.add(m); m.scale.setScalar(.8); }
+    else { const k=idx[n.shell]=(idx[n.shell]||0)+1, total=counts[n.shell]; const S2=SHELLS[n.shell]||SHELLS.personal;
+      const a=(k/total)*Math.PI*2 + hash(n.id)*.2, jitter=(hash(n.id+'j')-.5)*1.2, up=(hash(n.id+'u')-.5)*.9;
+      m.position.set(Math.cos(a)*(S2.r+jitter), up, Math.sin(a)*(S2.r+jitter)); (orbitGroups[n.shell]||scene).add(m); }
+    meshes.push(m);
+  });
+  linkGeo=new THREE.BufferGeometry(); linkGeo.setAttribute('position',new THREE.Float32BufferAttribute(new Float32Array(links.length*6),3));
+  const col=new Float32Array(links.length*6); links.forEach(([a,b],k)=>{ const ca=new THREE.Color((SHELLS[nodes[a].shell]||SHELLS.personal).color), cb=new THREE.Color((SHELLS[nodes[b].shell]||SHELLS.personal).color); col.set([ca.r,ca.g,ca.b,cb.r,cb.g,cb.b],k*6); });
+  linkGeo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));
+  linkLine=new THREE.LineSegments(linkGeo,new THREE.LineBasicMaterial({vertexColors:true,transparent:true,opacity:.22,depthWrite:false})); scene.add(linkLine);
+  document.getElementById('sNotes').textContent=nodes.length; document.getElementById('sLinks').textContent=links.length;
+  document.getElementById('sBonds').textContent=counts.bond||0; document.getElementById('sComp').textContent=data.components;
+  document.getElementById('sComp').style.color=data.components===1?'#5ad16b':'#ffa94d';
+  legend(counts); applyHidden();
+}
+function legend(counts){
+  const el=document.getElementById('legend');
+  el.innerHTML=Object.entries(SHELLS).filter(([k])=>counts[k]).map(([k,S])=>`<span class="chip ${hidden.has(k)?'off':''}" data-k="${k}"><i style="background:${S.color}"></i>${S.name} ${counts[k]||0}</span>`).join('');
+  el.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{ const k=c.dataset.k; hidden.has(k)?hidden.delete(k):hidden.add(k); c.classList.toggle('off'); applyHidden(); });
+}
+function applyHidden(){ nodes.forEach(n=>n.mesh.visible=!hidden.has(n.shell)); for(const k in rings) rings[k].visible=!hidden.has(k); }
+
+const wp=new THREE.Vector3(), tmp=new THREE.Vector3();
+function updateBondsAndLinks(){
+  // bonds float at the centre of everything they connect
+  const sum=new Map();
+  for(const [a,b] of links){ for(const [x,y] of [[a,b],[b,a]]) if(nodes[x].shell==='bond' && nodes[y].shell!=='bond'){ nodes[y].mesh.getWorldPosition(wp); const s=sum.get(x)||{v:new THREE.Vector3(),n:0}; s.v.add(wp); s.n++; sum.set(x,s); } }
+  for(const [i,s] of sum){ tmp.copy(s.v).divideScalar(s.n); nodes[i].mesh.position.lerp(tmp.multiplyScalar(.92),.08); }
+  if(!linkGeo) return; const pos=linkGeo.attributes.position.array;
+  links.forEach(([a,b],k)=>{ const A=nodes[a], B=nodes[b]; const vis=A.mesh.visible&&B.mesh.visible;
+    if(!vis){ pos.fill(0,k*6,k*6+6); return; }
+    A.mesh.getWorldPosition(wp); pos[k*6]=wp.x; pos[k*6+1]=wp.y; pos[k*6+2]=wp.z; B.mesh.getWorldPosition(wp); pos[k*6+3]=wp.x; pos[k*6+4]=wp.y; pos[k*6+5]=wp.z; });
+  linkGeo.attributes.position.needsUpdate=true; linkGeo.computeBoundingSphere();
+}
+
+async function load(){ try{ const r=await fetch('atom.json',{cache:'no-store'}); const d=await r.json(); if(!nodes.length || d.nodes.length!==nodes.length || d.links.length!==links.length) build(d); }catch(e){ document.querySelector('.sub').textContent='Start the lab server: python3 lab/server.py'; } }
+load(); setInterval(load, 30000);
+
+// hover + click
+const ray=new THREE.Raycaster(), mouse=new THREE.Vector2(), tip=document.getElementById('tip'); let hover=null, down=null;
+addEventListener('pointermove',e=>{ mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1); ray.setFromCamera(mouse,camera);
+  const h=ray.intersectObjects(meshes.filter(m=>m.visible)); hover=h[0]?.object||null;
+  if(hover){ const n=nodes[hover.userData.i]; tip.style.display='block'; tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY+10)+'px';
+    tip.innerHTML=`<b>${n.id}</b><small>${(SHELLS[n.shell]||SHELLS.personal).name} · ${n.deg} connections</small>`; renderer.domElement.style.cursor='pointer'; }
+  else { tip.style.display='none'; renderer.domElement.style.cursor='grab'; } });
+addEventListener('pointerdown',e=>{ down=[e.clientX,e.clientY]; controls.autoRotate=false; });
+addEventListener('pointerup',e=>{ if(down && Math.hypot(e.clientX-down[0],e.clientY-down[1])<5 && hover){ const n=nodes[hover.userData.i]; /* showcase: no file links */ } });
+
+const clock=new THREE.Clock();
+renderer.setAnimationLoop(()=>{ const dt=Math.min(clock.getDelta(),.05), t=clock.elapsedTime;
+  Object.entries(orbitGroups).forEach(([k,g],i)=>{ g.rotateOnAxis(new THREE.Vector3(0,1,0), dt*(.05+.02*(i%3))); });
+  updateBondsAndLinks(); pl.intensity=50+Math.sin(t*2)*10;
+  if(hover) hover.scale.setScalar(1.6+Math.sin(t*6)*.15); meshes.forEach(m=>{ if(m!==hover && m.scale.x>1.05 && nodes[m.userData.i]?.shell!=='bond') m.scale.setScalar(1); });
+  controls.update(); renderer.render(scene,camera); });
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+</script>
+<div style="position:fixed;bottom:4px;left:50%;transform:translateX(-50%);color:#56607a;font-size:11px;z-index:9">© 2026 Miles Gurule · All rights reserved</div>
+</body>
+</html>

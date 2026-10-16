@@ -1,0 +1,22 @@
+name: check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Syntax-check every JS module
+        run: |
+          set -e
+          for f in lab/v3/*.js; do cp "$f" /tmp/check.mjs; node --check /tmp/check.mjs; echo "ok $f"; done
+          for f in lab/index.html atom.html; do
+            node -e "const s=require('fs').readFileSync('$f','utf8');const m=s.match(/<script type=\"module\">([\s\S]*)<\/script>/);require('fs').writeFileSync('/tmp/inline.mjs',m[1])"
+            node --check /tmp/inline.mjs; echo "ok $f"
+          done
+      - name: Validate atom data
+        run: node -e "const d=require('./atom.json'); if(!d.nodes.length||!d.links.length) process.exit(1); console.log(d.nodes.length+' notes, '+d.links.length+' links')"
+      - name: No secrets
+        run: |
+          if grep -rInE "sk-ant-|AIza[0-9A-Za-z_-]{35}|ghp_[A-Za-z0-9]{36}|-----BEGIN [A-Z ]*PRIVATE KEY" --exclude-dir=.git .; then echo "secret found"; exit 1; fi

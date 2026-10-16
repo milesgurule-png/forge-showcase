@@ -1,5 +1,7 @@
 # Forge Labs Showcase
 
+[![check](https://github.com/milesgurule-png/forge-showcase/actions/workflows/check.yml/badge.svg)](https://github.com/milesgurule-png/forge-showcase/actions/workflows/check.yml) ![license](https://img.shields.io/badge/license-all%20rights%20reserved-lightgrey) ![three.js](https://img.shields.io/badge/three.js-r170-black)
+
 ![Science Lab demo](screenshots/science-lab.gif)
 
 **▶ [Open the live demo](https://milesgurule-png.github.io/forge-showcase/lab/)**

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Devlog · Miles Gurule</title>
+<meta name="description" content="What I built, what broke, and what I learned, building with AI agents at 15.">
+<meta property="og:title" content="Devlog · Miles Gurule"><meta property="og:description" content="What I built, what broke, and what I learned, building with AI agents at 15.">
+<meta property="og:image" content="https://milesgurule-png.github.io/forge-showcase/screenshots/og.jpg"><meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{--bg:#0b0f17;--card:#121826;--line:#232c40;--text:#e6ebf5;--muted:#8b95ab;--accent:#3dd6d0}
+  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f7fb;--card:#fff;--line:#e2e6ef;--text:#141a26;--muted:#5b6478;--accent:#0f9f99}}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 16px}
+  a{color:var(--accent)} .back{font-size:14px;text-decoration:none}
+  h1{font-size:clamp(28px,5vw,40px);margin:12px 0 4px;letter-spacing:-.02em} .lead{color:var(--muted);margin:0 0 32px}
+  article{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 22px 14px;margin:0 0 18px}
+  article h2{margin:0 0 2px;font-size:20px} time{color:var(--muted);font-size:13px}
+  article ul{padding-left:20px;margin:10px 0} li{margin:4px 0}
+  .lesson{border-left:3px solid var(--accent);padding:6px 12px;margin:12px 0;color:var(--muted);font-size:15px}
+  footer{margin-top:40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+</style></head>
+<body><div class="wrap">
+  <a class="back" href="./">← Back to projects</a>
+  <h1>Devlog</h1>
+  <p class="lead">What I built, what broke, and what I learned. Building with AI since May 2026, about 100 hours so far.</p>
+
+  <article>
+    <h2>Week of Oct 12: Forge Labs, a 3D lab, and going public</h2>
+    <time>October 12–16, 2026</time>
+    <ul>
+      <li>Set up <b>Forge Labs</b>: a team of AI research agents (historian, psychologist, quant, physicist, venture architect and more) run by a director agent, all writing into one Obsidian vault that syncs to GitHub automatically.</li>
+      <li>The agents wrote <b>600+ evidence-rated notes</b>: 100 psychology principles (with honest replication ratings), 200 math and quant principles (every worked example checked in Python) and 150 physics principles so far.</li>
+      <li>Built a <b>3D Science Lab</b> in Three.js where the agents show up as scientists in 9 themed rooms, with A* pathfinding through doorways, a walk cycle, sitting and typing, conversations, and collision-free steering.</li>
+      <li>Released <a href="https://github.com/milesgurule-png/obsidian-vault-atom">Vault Atom</a> (an Obsidian plugin, MIT) and <a href="https://github.com/milesgurule-png/forge-ai">Forge AI</a> (a local AI with RAG over my notes, Apache-2.0).</li>
+    </ul>
+    <div class="lesson"><b>What broke:</b> running four agents plus a local 8 GB model at once made my 16 GB Mac glitch. Now agents run one at a time.</div>
+    <div class="lesson"><b>Lesson:</b> model choice matters. Switching the note-writing agents from the biggest model to a mid-size one, and checking sources with one script instead of opening every page, made each note about 10–15× cheaper with the same quality.</div>
+    <div class="lesson"><b>Lesson:</b> a lot of famous psychology doesn't replicate (ego depletion, power posing, oxytocin and trust). Rating the evidence on everything was worth it.</div>
+  </article>
+
+  <article>
+    <h2>September: my agency website</h2>
+    <time>September 2026</time>
+    <ul><li>Designed and built a studio website with a scroll-driven animated layout (GSAP and Lenis), a pricing section and live project cards.</li></ul>
+  </article>
+
+  <article>
+    <h2>June: data pipeline</h2>
+    <time>June 2026</time>
+    <ul><li>Connected a B2B data API to my lead agent, filtered to US businesses, and checked each website automatically. Ended up with <b>8,000+ qualified leads</b>, every one with an email.</li></ul>
+    <div class="lesson"><b>Lesson:</b> data quality beats data quantity. Verifying emails before sending protects your sending domains.</div>
+  </article>
+
+  <article>
+    <h2>May: my first AI agent and a whole outreach stack</h2>
+    <time>May 20–30, 2026</time>
+    <ul>
+      <li>Built my first agent: it finds small businesses with broken or outdated websites, scrapes contact emails and writes a personalized pitch.</li>
+      <li>Built the tools around it: a 100-point lead scorer, an AI website-mockup generator, proposal and contract generators, a reply classifier with a one-click approval dashboard, and a booking webhook.</li>
+      <li>Set up cold-email infrastructure from scratch: 15 domains with SPF, DKIM and DMARC, 42 inboxes, and warm-up.</li>
+      <li>About 44 hours in 10 days. My busiest day was 226 prompts.</li>
+    </ul>
+    <div class="lesson"><b>Lesson:</b> never hardcode API keys. I learned this the hard way and now use a pre-commit guard that blocks them.</div>
+  </article>
+
+  <footer>© 2026 Miles Gurule. All rights reserved. · New entries weekly.</footer>
+</div></body></html>

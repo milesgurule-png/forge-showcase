@@ -1,6 +1,8 @@
 # Forge Labs Showcase
 
-![Science Lab](screenshots/science-lab.jpg)
+![Science Lab demo](screenshots/science-lab.gif)
+
+**▶ [Open the live demo](https://milesgurule-png.github.io/forge-showcase/lab/)**
 
 **Live demos of projects by [Miles Gurule](https://github.com/milesgurule-png).** All demos use sample data.
 

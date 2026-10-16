@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Walking Scientists in Three.js</title>
+<meta name="description" content="How I made 10 AI scientists walk between rooms in a Three.js lab without clipping through walls or each other: a waypoint graph, A*, steering, and a hard no-overlap rule.">
+<meta property="og:title" content="How I made 10 scientists walk around a 3D lab without crashing into each other">
+<meta property="og:description" content="Waypoint graph + A* + steering + a hard no-overlap rule, in plain Three.js.">
+<meta property="og:image" content="https://milesgurule-png.github.io/forge-showcase/screenshots/og.jpg"><meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{--bg:#0b0f17;--card:#121826;--line:#232c40;--text:#e6ebf5;--muted:#8b95ab;--accent:#3dd6d0;--code:#0e1420}
+  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f7fb;--card:#fff;--line:#e2e6ef;--text:#141a26;--muted:#5b6478;--accent:#0f9f99;--code:#f0f2f8}}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:17px/1.7 system-ui,-apple-system,"Segoe UI",sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:48px 16px}
+  a{color:var(--accent)} .back{font-size:14px;text-decoration:none}
+  h1{font-size:clamp(28px,5vw,40px);line-height:1.2;margin:14px 0 6px;letter-spacing:-.02em}
+  .meta{color:var(--muted);font-size:14px;margin-bottom:28px}
+  h2{font-size:22px;margin:36px 0 8px}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
+  p code,li code{background:var(--code);padding:1px 5px;border-radius:5px}
+  img{max-width:100%;border-radius:12px;border:1px solid var(--line)}
+  .note{border-left:3px solid var(--accent);padding:8px 14px;margin:18px 0;color:var(--muted);font-size:15.5px;background:var(--card);border-radius:0 8px 8px 0}
+  table{border-collapse:collapse;width:100%;font-size:15px;margin:12px 0} td,th{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}
+  footer{margin-top:48px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:16px}
+</style></head>
+<body><div class="wrap">
+  <a class="back" href="../devlog.html">← Devlog</a>
+  <h1>How I made 10 scientists walk around a 3D lab without crashing into each other</h1>
+  <div class="meta">October 16, 2026 · Miles Gurule · about an 8 minute read · <a href="../lab/">Try the lab</a></div>
+
+  <p><img src="../screenshots/science-lab.gif" alt="Scientists walking between rooms in the 3D Science Lab"></p>
+
+  <p>My Science Lab is a Three.js scene with nine themed rooms, an atrium in the middle, and ten AI "scientists" who walk between their desks, a coffee bar and each other's rooms. The first version looked fine in screenshots and terrible in motion. People walked through walls, clipped into each other at the coffee machine, and sometimes ended up standing <i>inside</i> someone who was sitting down.</p>
+  <p>Here's what actually fixed it. There are four layers, and each one handles a problem the layer before it can't.</p>
+
+  <h2>1. Don't pathfind on a grid. Use a waypoint graph.</h2>
+  <p>My first idea was a tile grid with A* over every cell. For a lab that's mostly corridors and doorways, that's overkill. Instead I placed about 40 hand-picked <b>waypoints</b>: corridor junctions, a point just inside and just outside each door, and a ring of eight points around the big table in the atrium. Each waypoint knows which <b>region</b> it belongs to.</p>
+<pre><code>const node = (x, z, region) =&gt; { nodes.push({ p: V(x, z), region, n: [] }); return nodes.length - 1; };
+const link = (a, b) =&gt; { nodes[a].n.push(b); nodes[b].n.push(a); };
+
+// every room is two nodes: one just inside the door, one at the room's hub
+const roomLink = (rid, corridorKey, inside, hub) =&gt; {
+  const i = node(inside[0], inside[1], rid), h = node(hub[0], hub[1], rid);
+  link(C[corridorKey], i); link(i, h);
+};</code></pre>
+  <p>Because the only edges into a room go through its door node, a path <i>can't</i> cut through a wall. I never had to write wall collision for walkers at all.</p>
+
+  <h2>2. A* only when you leave the room</h2>
+  <p>If you're already in the same room as your target, you just walk straight there. A* runs only when the start and the goal are in different regions:</p>
+<pre><code>function route(from, to) {
+  const ra = regionOf(from), rb = regionOf(to);
+  if (ra === rb &amp;&amp; ra !== 'corridor' &amp;&amp; !(ra === 'atrium' &amp;&amp; crossesVault(from, to))) return [];
+  const s = nearest(from, ra), g = nearest(to, rb);
+  // ...standard A*: g = distance so far, h = straight-line distance to goal
+}</code></pre>
+  <p>There's one exception: the atrium has a big round table in the middle (the "vault"). <code>crossesVault</code> checks whether the straight line passes within 1.9 m of the center. If it does, the scientist goes around using the ring nodes. With about 40 nodes, A* with a plain <code>Set</code> as the open list is instant. A priority queue would be wasted effort here.</p>
+  <div class="note"><b>Lesson:</b> pick the simplest structure that matches the shape of your world. Corridors and doors make a graph, not a grid.</div>
+
+  <h2>3. Steering: curve around people, and yield</h2>
+  <p>A* knows about walls, not people. Two scientists heading opposite ways down a corridor would walk straight into each other. So every frame, each walker looks at everyone within 1.4 m and works out how much they're <b>ahead</b> (the dot product of the offset with my walking direction):</p>
+<pre><code>const ahead = -off.dot(dir) / d;            // &gt; 0 means they're in front of me
+if (ahead &gt; .2) steer.addScaledVector(off.normalize(), (1.4 - d) / 1.4 * (1 + ahead));
+if (ahead &gt; .75 &amp;&amp; d &lt; .95 &amp;&amp; (o.mode !== 'walk' || o.id &lt; s.id)) yieldTo = true;</code></pre>
+  <p>The steering vector bends my direction sideways, so people pass each other instead of colliding head-on. The yield rule is the important trick. When two walkers meet, <b>only one of them slows down</b>, and it's decided by comparing IDs. Without a tie-breaker, both politely slowed down, both stepped the same way, and they did an awkward hallway dance forever.</p>
+
+  <h2>4. Reserve the spot before you walk to it</h2>
+  <p>Most of the clipping wasn't happening in corridors. It was at the destinations. Three people would pick the same coffee spot because it was free <i>when they decided</i>. So now a spot counts as <code>taken</code> if anyone is standing on it, already walking to it, or ending their path near it:</p>
+<pre><code>function taken(s, p) {
+  return all().some(o =&gt; o !== s &amp;&amp; (
+    (o.mode !== 'walk' &amp;&amp; o.spot?.p?.distanceTo(p) &lt; .9) ||
+    (o.mode === 'walk' &amp;&amp; (o.nextSpot?.p?.distanceTo(p) &lt; .9 || o.path?.at(-1)?.distanceTo(p) &lt; .9)) ||
+    o.root.position.distanceTo(p) &lt; .6));
+}</code></pre>
+
+  <h2>5. The safety net: a hard 0.55 m rule</h2>
+  <p>Steering is soft, so it can still lose to a crowded doorway. The last pass in every frame enforces a hard minimum distance of <b>0.55 m</b> between any two people. Who moves depends on posture. A seated person never gets pushed, so the standing one takes the whole correction. Two standing people split it.</p>
+<pre><code>if (d &lt; MIN) {
+  const fix = MIN - d;
+  if (o.sit &gt; .5 &amp;&amp; s.sit &lt;= .5) pos.addScaledVector(off, fix);          // they're seated: I move
+  else if (s.sit &lt;= .5) { pos.addScaledVector(off, fix / 2);               // both standing: split it
+                          o.root.position.addScaledVector(off, -fix / 2); }
+}</code></pre>
+
+  <h2>How I tested it</h2>
+  <p>Watching for clipping by eye doesn't work. So I exposed a small debug hook, <code>window.__lab</code>, which can step the simulation forward without rendering. Then I ran thousands of frames and logged the closest distance between any two people. (This also got around browsers pausing <code>requestAnimationFrame</code> in background tabs.)</p>
+  <table>
+    <tr><th>Version</th><th>Overlaps (&lt; 0.55 m)</th></tr>
+    <tr><td>Waypoints + A* only</td><td>constant, worst at the coffee bar</td></tr>
+    <tr><td>+ steering and yielding</td><td>rare, mostly at destinations</td></tr>
+    <tr><td>+ spot reservation + hard rule</td><td><b>0</b></td></tr>
+  </table>
+
+  <h2>What I'd do differently</h2>
+  <ul>
+    <li>Put the debug hook in on day one. I spent hours eyeballing bugs that a single number would have shown right away.</li>
+    <li>Split the code into modules early. My first lab was one giant HTML file, and AI agents kept stalling when they tried to rewrite the whole thing. Splitting it into <code>world.js</code> and <code>people.js</code> fixed that.</li>
+    <li>Look at real crowd-simulation techniques like <a href="https://gamma.cs.unc.edu/RVO2/">RVO2 / ORCA</a>. My steering is a simplified version of the same idea.</li>
+  </ul>
+
+  <p><a href="../lab/">Open the live lab →</a> (it runs in demo mode in your browser)</p>
+
+  <footer>© 2026 Miles Gurule. All rights reserved. Code excerpts are shown for learning purposes.</footer>
+</div></body></html>

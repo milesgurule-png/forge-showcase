@@ -3,47 +3,183 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Miles Gurule · Builder</title>
 <meta property="og:title" content="Miles Gurule · Builder">
-<meta property="og:description" content="AI agent systems, a 3D science lab, and 1,000+ connected research notes, built at 15.">
+<meta property="og:description" content="AI agent systems, a 3D science lab, open-source tools and 1,000+ connected research notes, built at 15.">
 <meta property="og:image" content="https://milesgurule-png.github.io/forge-showcase/screenshots/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:url" content="https://milesgurule-png.github.io/forge-showcase/"><meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://milesgurule-png.github.io/forge-showcase/screenshots/og.jpg">
-
-<meta name="description" content="Projects by Miles Gurule: an AI agent research lab, a 3D science lab, and a vault of 1,000+ connected research notes.">
+<meta name="description" content="Projects by Miles Gurule: an AI agent research lab, a 3D science lab, open-source tools, client websites, and a vault of 1,000+ connected research notes.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
 <style>
-  :root{--bg:#0b0f17;--card:#121826;--line:#232c40;--text:#e6ebf5;--muted:#8b95ab;--accent:#3dd6d0}
-  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f7fb;--card:#fff;--line:#e2e6ef;--text:#141a26;--muted:#5b6478;--accent:#0f9f99}}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
-  .wrap{max-width:980px;margin:0 auto;padding:56px 16px}
-  h1{font-size:clamp(30px,5vw,46px);margin:0 0 6px;letter-spacing:-.02em} .lead{color:var(--muted);font-size:18px;margin:0 0 28px;max-width:680px}
-  .stats{display:flex;flex-wrap:wrap;gap:22px;margin:0 0 40px} .stat b{display:block;font-size:26px} .stat span{color:var(--muted);font-size:13px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;text-decoration:none;color:inherit;display:block;transition:border-color .2s,transform .2s}
-  a.card:hover{border-color:var(--accent);transform:translateY(-2px)} .card h3{margin:0 0 6px} .card p{margin:0;color:var(--muted);font-size:14.5px}
-  .tag{display:inline-block;font-size:12px;color:var(--accent);margin-bottom:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-  h2{margin:48px 0 14px;font-size:22px} ul{color:var(--muted);padding-left:20px} li{margin:4px 0}
-  footer{margin-top:56px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:18px}
+  :root{--bg:#0b0f17;--card:#121826;--card2:#0f1420;--line:#232c40;--text:#e6ebf5;--muted:#8b95ab;--accent:#3dd6d0;--accent-ink:#04201f;--glow:rgba(61,214,208,.14)}
+  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f7fb;--card:#fff;--card2:#f0f2f7;--line:#e2e6ef;--text:#141a26;--muted:#5b6478;--accent:#0f9f99;--accent-ink:#fff;--glow:rgba(15,159,153,.10)}}
+  *{box-sizing:border-box} html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+  a{color:var(--accent)} img{max-width:100%;display:block}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+  nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:20px;height:56px}
+  nav .brand{font-weight:700;text-decoration:none;color:var(--text);margin-right:auto}
+  nav a.l{color:var(--muted);text-decoration:none;font-size:14.5px} nav a.l:hover{color:var(--text)}
+  @media (max-width:640px){nav a.l.hide-sm{display:none}}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--line);color:var(--text);background:var(--card)}
+  .btn:hover{border-color:var(--accent)} .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)} .btn.primary:hover{filter:brightness(1.08)}
+  .btn.sm{padding:7px 12px;font-size:13.5px}
+  header.hero{padding:64px 0 40px;background:radial-gradient(800px 400px at 80% 0%,var(--glow),transparent 70%)}
+  .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+  @media (max-width:860px){.hero-grid{grid-template-columns:1fr}}
+  .eyebrow{color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px}
+  h1{font-size:clamp(34px,5.5vw,52px);line-height:1.08;margin:0 0 14px;letter-spacing:-.025em}
+  .lead{color:var(--muted);font-size:18px;margin:0 0 24px;max-width:560px}
+  .ctas{display:flex;flex-wrap:wrap;gap:10px}
+  .hero-shot{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.35);position:relative;display:block}
+  .hero-shot span{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.65);color:#fff;font-size:13px;padding:6px 10px;border-radius:8px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:40px 0 0}
+  @media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat b{display:block;font-size:26px;letter-spacing:-.02em} .stat span{color:var(--muted);font-size:13px}
+  section{padding:44px 0 8px} h2{margin:0 0 6px;font-size:26px;letter-spacing:-.015em} .sub{color:var(--muted);margin:0 0 22px}
+  .grid>*,.hero-grid>*{min-width:0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
+  a.card:hover,.card.link:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .card .shot{aspect-ratio:16/9;object-fit:cover;width:100%;height:auto;border-bottom:1px solid var(--line)}
+  .card .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
+  .card h3{margin:0;font-size:18px} .card p{margin:0;color:var(--muted);font-size:14.5px}
+  .tag{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:12px;align-items:center}
+  .pill{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+  .stars{font-size:13px;color:var(--muted)}
+  .mini{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 2px}
+  .mini td,.mini th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right} .mini td:first-child,.mini th:first-child{text-align:left}
+  .mini th{color:var(--muted);font-weight:600}
+  .code{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12.5px/1.4 ui-monospace,Menlo,monospace;overflow-x:auto;white-space:nowrap}
+  .private .body{background:linear-gradient(180deg,transparent,var(--card2))}
+  .log{display:grid;gap:10px} .log a{display:flex;gap:14px;align-items:baseline;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--text)}
+  .log a:hover{border-color:var(--accent)} .log time{color:var(--muted);font-size:13px;min-width:92px}
+  .stack{display:flex;flex-wrap:wrap;gap:8px} .stack span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px}
+  .follow{margin:48px 0 0;padding:28px;border:1px solid var(--line);border-radius:16px;background:radial-gradient(600px 200px at 0% 0%,var(--glow),transparent 70%),var(--card);display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+  .follow h2{font-size:22px} .follow p{margin:0;color:var(--muted)}
+  footer{margin:48px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding:18px 0 40px}
 </style></head>
-<body><div class="wrap">
-  <h1>Miles Gurule</h1>
-  <p class="lead">15-year-old builder from Middle Tennessee. I build AI agent systems, automation and 3D tools, and use them to research and start businesses.</p>
+<body>
+<nav><div class="wrap">
+  <a class="brand" href="#">Miles Gurule</a>
+  <a class="l" href="#demos">Demos</a>
+  <a class="l hide-sm" href="#open-source">Open source</a>
+  <a class="l hide-sm" href="#client">Client work</a>
+  <a class="l hide-sm" href="devlog.html">Devlog</a>
+  <a class="btn sm" href="https://github.com/milesgurule-png">GitHub</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="hero-grid">
+    <div>
+      <p class="eyebrow">Forge Labs · Middle Tennessee</p>
+      <h1>I build AI agent systems, 3D tools and open-source software.</h1>
+      <p class="lead">I'm Miles, a 15-year-old builder. I run a team of AI research agents, ship open-source tools for developers and security teams, and build websites for real clients.</p>
+      <div class="ctas">
+        <a class="btn primary" href="lab/">▶ Try the 3D Science Lab</a>
+        <a class="btn" href="#open-source">Open-source projects</a>
+        <a class="btn" href="https://github.com/milesgurule-png">Follow on GitHub</a>
+      </div>
+    </div>
+    <a class="hero-shot" href="lab/"><img src="screenshots/science-lab.gif" alt="AI agents as scientists walking around a 3D research facility" width="728" height="414"><span>Live demo · runs in your browser</span></a>
+  </div>
   <div class="stats">
-    <div class="stat"><b>~100 h</b><span>building with AI since May 2026</span></div>
+    <div class="stat"><b>3</b><span>open-source projects</span></div>
     <div class="stat"><b>9</b><span>AI research agents</span></div>
-    <div class="stat"><b>1,000+</b><span>evidence-backed research notes</span></div>
-    <div class="stat"><b>4,000+</b><span>links between ideas</span></div>
+    <div class="stat"><b>1,000+</b><span>evidence-backed notes</span></div>
+    <div class="stat"><b>4,000+</b><span>cited links between ideas</span></div>
   </div>
-  <div class="grid">
-    <a class="card" href="lab/"><span class="tag">Live 3D demo</span><h3>🧪 Forge Labs Science Lab</h3><p>My AI agent team as scientists in a 3D research facility with 9 themed rooms. They walk to their rooms when an agent is working, hold conversations about their real research, and take coffee breaks. Built with Three.js and custom pathfinding.</p></a>
-    <a class="card" href="atom.html"><span class="tag">Live 3D demo</span><h3>⚛️ Vault Atom</h3><p>About 500 research notes on history, psychology, math and physics, drawn as one connected atom, with each domain as an orbiting shell and over 4,000 cited connections.</p></a>
-    <div class="card"><span class="tag">Private · AI agents</span><h3>🤖 Agent team</h3><p>Nine specialized research agents (historian, psychologist, quant, physicist, venture architect…) coordinated by a director, writing evidence-rated notes with a one-pass link checker and a shared source library.</p></div>
-    <div class="card"><span class="tag">Private · Automation</span><h3>📈 Lead generation &amp; outreach</h3><p>An AI lead-generation agent and cold-email infrastructure: scraping, website auditing, lead scoring, deliverability setup, and an AI reply handler.</p></div>
-    <div class="card"><span class="tag">Private · Local AI</span><h3>🧠 Forge AI</h3><p>My own assistant running fully on my laptop with an open-weight model, used to summarize research and power in-character chat with the lab's scientists.</p></div>
+</div></header>
+
+<main class="wrap">
+  <section id="demos">
+    <h2>Live demos</h2>
+    <p class="sub">Both run right in your browser, no install. They use sample data.</p>
+    <div class="grid">
+      <a class="card" href="lab/"><img class="shot" src="screenshots/science-lab.jpg" alt="Science Lab" loading="lazy" width="728" height="414">
+        <div class="body"><span class="tag">3D · Three.js</span><h3>🧪 Forge Labs Science Lab</h3>
+        <p>My AI agent team as scientists in a 3D facility with 9 themed rooms. They walk to their stations when an agent starts work, talk about their real research, and take coffee breaks. Custom A* pathfinding keeps 10 people from walking into each other.</p>
+        <div class="meta"><span class="pill">Three.js</span><span class="pill">A* pathfinding</span></div></div></a>
+      <a class="card" href="atom.html"><img class="shot" src="screenshots/vault-atom.jpg" alt="Vault Atom" loading="lazy" width="728" height="414">
+        <div class="body"><span class="tag">3D · Data viz</span><h3>⚛️ Vault Atom</h3>
+        <p>About 500 research notes on history, psychology, math and physics drawn as one connected atom. Each field is an orbiting shell, linked by over 4,000 cited connections.</p>
+        <div class="meta"><span class="pill">Three.js</span><span class="pill">Graph layout</span></div></div></a>
+    </div>
+  </section>
+
+  <section id="open-source">
+    <h2>Open source</h2>
+    <p class="sub">Free tools anyone can use. Stars and issues are very welcome.</p>
+    <div class="grid">
+      <a class="card" href="https://github.com/milesgurule-png/triage-scorecard"><div class="body">
+        <span class="tag">Security · Node CLI · MIT</span><h3>🎯 Triage Scorecard</h3>
+        <p>How good is your vulnerability triage, really? Scores any prioritization rule against real CISA KEV and FIRST EPSS data, replayed day by day with no future data.</p>
+        <table class="mini"><tr><th>60 real days</th><th>Alerts/day</th><th>KEV recall</th></tr>
+          <tr><td>EPSS ≥ 0.1</td><td>17,310</td><td>75.1%</td></tr>
+          <tr><td>EPSS top 1%</td><td>3,747</td><td>48.5%</td></tr>
+          <tr><td>KEV only</td><td>1,709</td><td>100%</td></tr></table>
+        <div class="code">npx github:milesgurule-png/triage-scorecard</div>
+        <div class="meta"><span class="pill">Zero dependencies</span><span class="stars" data-repo="triage-scorecard"></span></div></div></a>
+      <a class="card" href="https://github.com/milesgurule-png/obsidian-vault-atom"><img class="shot" src="screenshots/vault-atom.jpg" alt="Vault Atom plugin" loading="lazy" width="728" height="414"><div class="body">
+        <span class="tag">Obsidian plugin · MIT</span><h3>⚛️ Vault Atom for Obsidian</h3>
+        <p>Turn your own Obsidian vault into the 3D atom above. Your folders become shells and your links become bonds. Works with any vault, fully configurable.</p>
+        <div class="meta"><span class="pill">Obsidian</span><span class="pill">Three.js</span><span class="stars" data-repo="obsidian-vault-atom"></span></div></div></a>
+      <a class="card" href="https://github.com/milesgurule-png/forge-ai"><div class="body">
+        <span class="tag">Local AI · Python · Apache-2.0</span><h3>🧠 Forge AI</h3>
+        <p>A private AI assistant that runs on your own computer and answers from your Obsidian notes with citations. Nothing leaves your machine. It powers the Science Lab's in-character chat.</p>
+        <div class="code">Ollama + local RAG · ~23 tokens/s on an M4 MacBook Air</div>
+        <div class="meta"><span class="pill">Ollama</span><span class="pill">RAG</span><span class="stars" data-repo="forge-ai"></span></div></div></a>
+    </div>
+  </section>
+
+  <section id="client">
+    <h2>Client work</h2>
+    <p class="sub">Real websites for real businesses.</p>
+    <div class="grid">
+      <a class="card" href="https://garrett-company-site.milesgurule.workers.dev/"><img class="shot" src="screenshots/garrett.jpg" alt="The Garrett Company website" loading="lazy" width="1000" height="625">
+        <div class="body"><span class="tag">Website · Real estate</span><h3>🏡 The Garrett Company</h3>
+        <p>A full site for a third-generation real estate brokerage in Franklin, TN, founded in 1947. Real company history, sales and listings, drone-video hero, and typo-tolerant search over every Middle Tennessee city and ZIP.</p>
+        <div class="meta"><span class="pill">Preview</span><span class="pill">Cloudflare</span></div></div></a>
+      <div class="card private"><div class="body"><span class="tag">Private · AI agents</span><h3>🤖 Research agent team</h3>
+        <p>Nine specialized agents (historian, psychologist, quant, physicist and more) coordinated by a director. They write evidence-rated notes with a one-pass link checker and a shared source library.</p></div></div>
+      <div class="card private"><div class="body"><span class="tag">Private · Automation</span><h3>📈 Lead generation &amp; outreach</h3>
+        <p>An AI lead-generation agent and cold-email setup: website auditing, lead scoring, deliverability and an AI reply handler.</p></div></div>
+    </div>
+  </section>
+
+  <section id="devlog">
+    <h2>Devlog</h2>
+    <p class="sub">What I built, what broke, and what I learned.</p>
+    <div class="log">
+      <a href="devlog.html"><time>Oct 16, 2026</time><span>My first client website: The Garrett Company</span></a>
+      <a href="posts/walking-scientists.html"><time>Deep dive</time><span>How I made 10 scientists walk around a 3D lab without crashing into each other</span></a>
+      <a href="devlog.html"><time>Oct 12, 2026</time><span>Forge Labs, a 3D lab, and going public</span></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Stack</h2>
+    <div class="stack"><span>JavaScript / Node.js</span><span>Three.js</span><span>React</span><span>Python</span><span>Claude agents</span><span>Ollama / MLX</span><span>Obsidian + Git</span><span>Cloudflare</span><span>GitHub Actions</span></div>
+  </section>
+
+  <div class="follow">
+    <div><h2>Follow along</h2><p>I ship something new almost every week.</p></div>
+    <div class="ctas"><a class="btn primary" href="https://github.com/milesgurule-png">Follow on GitHub</a><a class="btn" href="devlog.html">Read the devlog</a></div>
   </div>
-  <h2>Devlog</h2>
-  <p style="color:var(--muted)">What I built, what broke, and what I learned. <a href="devlog.html" style="color:var(--accent)">Read the devlog →</a> · <a href="posts/walking-scientists.html" style="color:var(--accent)">New: pathfinding deep dive</a></p>
-  <h2>Stack</h2>
-  <ul><li>JavaScript / Node.js, React, Three.js, Python</li><li>Claude (agents, Agent SDK workflows), local LLMs via Ollama/MLX</li><li>APIs: Google Places, Apollo, Instantly, Crossref; DNS &amp; email deliverability</li><li>Obsidian + Git as a living research database</li></ul>
-  <footer>© 2026 Miles Gurule. All rights reserved. The demos use sample data. Source code is not licensed for reuse.</footer>
-</div></body></html>
+
+  <footer>© 2026 Miles Gurule. All rights reserved. The demos use sample data. Code on this site is not licensed for reuse; the open-source projects above carry their own licenses.</footer>
+</main>
+<script>
+  // Live star counts (fails quietly if GitHub's API is rate-limited).
+  document.querySelectorAll('[data-repo]').forEach(function (el) {
+    fetch('https://api.github.com/repos/milesgurule-png/' + el.dataset.repo)
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d && d.stargazers_count != null) el.textContent = '★ ' + d.stargazers_count; })
+      .catch(function () {});
+  });
+</script>
+</body></html>

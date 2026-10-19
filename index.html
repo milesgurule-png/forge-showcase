@@ -3,183 +3,423 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Miles Gurule · Builder</title>
 <meta property="og:title" content="Miles Gurule · Builder">
-<meta property="og:description" content="AI agent systems, a 3D science lab, open-source tools and 1,000+ connected research notes, built at 15.">
+<meta property="og:description" content="AI agent systems, open-source security tools, 3D experiments and websites for real businesses, built at 15.">
 <meta property="og:image" content="https://milesgurule-png.github.io/forge-showcase/screenshots/og.jpg">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
 <meta property="og:url" content="https://milesgurule-png.github.io/forge-showcase/"><meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://milesgurule-png.github.io/forge-showcase/screenshots/og.jpg">
-<meta name="description" content="Projects by Miles Gurule: an AI agent research lab, a 3D science lab, open-source tools, client websites, and a vault of 1,000+ connected research notes.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧪</text></svg>">
+<meta name="description" content="Projects by Miles Gurule (Forge Labs): AI agent systems, open-source security tools, 3D experiments and websites for real businesses.">
+<meta name="theme-color" content="#050505">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23050505'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='%23ECEDEF' font-family='Georgia' font-style='italic'>M</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }</script>
 <style>
-  :root{--bg:#0b0f17;--card:#121826;--card2:#0f1420;--line:#232c40;--text:#e6ebf5;--muted:#8b95ab;--accent:#3dd6d0;--accent-ink:#04201f;--glow:rgba(61,214,208,.14)}
-  @media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f7fb;--card:#fff;--card2:#f0f2f7;--line:#e2e6ef;--text:#141a26;--muted:#5b6478;--accent:#0f9f99;--accent-ink:#fff;--glow:rgba(15,159,153,.10)}}
-  *{box-sizing:border-box} html{scroll-behavior:smooth}
-  body{margin:0;background:var(--bg);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
-  a{color:var(--accent)} img{max-width:100%;display:block}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
-  nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-  nav .wrap{display:flex;align-items:center;gap:20px;height:56px}
-  nav .brand{font-weight:700;text-decoration:none;color:var(--text);margin-right:auto}
-  nav a.l{color:var(--muted);text-decoration:none;font-size:14.5px} nav a.l:hover{color:var(--text)}
-  @media (max-width:640px){nav a.l.hide-sm{display:none}}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none;border:1px solid var(--line);color:var(--text);background:var(--card)}
-  .btn:hover{border-color:var(--accent)} .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)} .btn.primary:hover{filter:brightness(1.08)}
-  .btn.sm{padding:7px 12px;font-size:13.5px}
-  header.hero{padding:64px 0 40px;background:radial-gradient(800px 400px at 80% 0%,var(--glow),transparent 70%)}
-  .hero-grid{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
-  @media (max-width:860px){.hero-grid{grid-template-columns:1fr}}
-  .eyebrow{color:var(--accent);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px}
-  h1{font-size:clamp(34px,5.5vw,52px);line-height:1.08;margin:0 0 14px;letter-spacing:-.025em}
-  .lead{color:var(--muted);font-size:18px;margin:0 0 24px;max-width:560px}
+  :root{
+    --bg:#050505;--bg2:#0c0c0d;--line:rgba(236,237,239,.09);--line2:rgba(236,237,239,.18);
+    --text:#ECEDEF;--muted:#94979e;--dim:#62656c;--live:#ff5b2e;
+    --sans:"Inter Tight",system-ui,-apple-system,sans-serif;--serif:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);--gut:clamp(16px,4vw,56px);--max:1240px;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit;text-decoration:none} img{display:block;max-width:100%;height:auto}
+  em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gut)}
+  .mono{font:500 12px/1.4 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  ::selection{background:var(--text);color:var(--bg)}
+
+  /* nav */
+  nav{position:fixed;inset:0 0 auto;z-index:20;transition:background .4s,border-color .4s;border-bottom:1px solid transparent}
+  nav.solid{background:rgba(5,5,5,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:28px;height:68px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:auto}
+  .brand i{width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);display:grid;place-items:center;font:italic 19px/1 var(--serif)}
+  nav .l{font-size:14.5px;color:var(--muted);transition:color .2s} nav .l:hover{color:var(--text)}
+  .btn{display:inline-flex;align-items:center;gap:8px;height:46px;padding:0 20px;border-radius:999px;font:600 15px/1 var(--sans);border:1px solid var(--line2);background:rgba(5,5,5,.4);transition:transform .3s var(--ease),background .2s,border-color .2s;white-space:nowrap}
+  .btn:hover{border-color:var(--text);transform:translateY(-1px)}
+  .btn.solid{background:var(--text);color:var(--bg);border-color:var(--text)} .btn.solid:hover{background:#fff}
+  .btn.sm{height:38px;padding:0 16px;font-size:14px}
+  @media (max-width:760px){nav .l{display:none}}
+
+  /* hero */
+  .hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+  #graph{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair}
+  .hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,5,.35) 0%,transparent 30%,transparent 48%,rgba(5,5,5,.9) 86%,var(--bg) 100%)}
+  .hero .wrap{position:relative;z-index:2;width:100%;padding-bottom:56px;pointer-events:none}
+  .hero .wrap a{pointer-events:auto}
+  .hero h1{font:600 clamp(48px,9vw,132px)/.92 var(--sans);letter-spacing:-.045em;margin:18px 0 26px;max-width:12ch}
+  .hero h1 em{font-size:1.08em;letter-spacing:-.02em}
+  .hero-row{display:flex;flex-wrap:wrap;gap:28px 48px;align-items:flex-end;justify-content:space-between}
+  .hero-row>*{min-width:0} .hero p.lead{flex:1 1 300px;margin:0;max-width:520px;color:var(--muted);font-size:clamp(17px,1.5vw,19px)}
+  .hero p.lead b{color:var(--text);font-weight:500}
   .ctas{display:flex;flex-wrap:wrap;gap:10px}
-  .hero-shot{border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.35);position:relative;display:block}
-  .hero-shot span{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.65);color:#fff;font-size:13px;padding:6px 10px;border-radius:8px}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:40px 0 0}
-  @media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
-  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-  .stat b{display:block;font-size:26px;letter-spacing:-.02em} .stat span{color:var(--muted);font-size:13px}
-  section{padding:44px 0 8px} h2{margin:0 0 6px;font-size:26px;letter-spacing:-.015em} .sub{color:var(--muted);margin:0 0 22px}
-  .grid>*,.hero-grid>*{min-width:0}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:border-color .2s,transform .2s}
-  a.card:hover,.card.link:hover{border-color:var(--accent);transform:translateY(-2px)}
-  .card .shot{aspect-ratio:16/9;object-fit:cover;width:100%;height:auto;border-bottom:1px solid var(--line)}
-  .card .body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
-  .card h3{margin:0;font-size:18px} .card p{margin:0;color:var(--muted);font-size:14.5px}
-  .tag{font-size:12px;color:var(--accent);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
-  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:12px;align-items:center}
-  .pill{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
-  .stars{font-size:13px;color:var(--muted)}
-  .mini{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0 2px}
-  .mini td,.mini th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right} .mini td:first-child,.mini th:first-child{text-align:left}
-  .mini th{color:var(--muted);font-weight:600}
-  .code{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:12.5px/1.4 ui-monospace,Menlo,monospace;overflow-x:auto;white-space:nowrap}
-  .private .body{background:linear-gradient(180deg,transparent,var(--card2))}
-  .log{display:grid;gap:10px} .log a{display:flex;gap:14px;align-items:baseline;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);text-decoration:none;color:var(--text)}
-  .log a:hover{border-color:var(--accent)} .log time{color:var(--muted);font-size:13px;min-width:92px}
-  .stack{display:flex;flex-wrap:wrap;gap:8px} .stack span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px}
-  .follow{margin:48px 0 0;padding:28px;border:1px solid var(--line);border-radius:16px;background:radial-gradient(600px 200px at 0% 0%,var(--glow),transparent 70%),var(--card);display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
-  .follow h2{font-size:22px} .follow p{margin:0;color:var(--muted)}
-  footer{margin:48px 0 0;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding:18px 0 40px}
+  .probe{position:absolute;z-index:3;right:var(--gut);top:100px;text-align:right;max-width:360px;pointer-events:none}
+  .probe b{display:block;font:italic 27px/1.15 var(--serif);font-weight:400;color:var(--text);margin-top:10px;min-height:31px;transition:opacity .25s}
+  .probe small{display:block;color:var(--muted);font-size:13px;margin-top:4px;transition:opacity .25s}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:8px;vertical-align:1px;background:var(--live);box-shadow:0 0 12px var(--live);animation:blink 1.6s infinite}
+  @keyframes blink{50%{opacity:.25}}
+  @media (max-width:760px){.probe{left:var(--gut);right:auto;text-align:left;top:88px}.probe b{font-size:22px}}
+
+  /* ticker */
+  .ticker{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding:16px 0;background:var(--bg);display:flex}
+  .ticker div{display:inline-flex;flex-shrink:0;gap:56px;padding-right:56px;animation:tick 48s linear infinite}
+  .ticker span{font:500 13px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .ticker span b{color:var(--text);font-weight:500}
+  @keyframes tick{to{transform:translateX(-100%)}}
+
+  /* sections */
+  section{padding:clamp(80px,11vw,150px) 0 0}
+  .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:clamp(40px,6vw,72px)}
+  h2{font:600 clamp(38px,5.6vw,76px)/.98 var(--sans);letter-spacing:-.04em;margin:14px 0 0}
+  .head p{margin:0;max-width:420px;color:var(--muted)}
+
+  /* work rows */
+  .work{display:grid;gap:clamp(72px,10vw,140px)}
+  .row{display:grid;grid-template-columns:1.25fr 1fr;gap:clamp(28px,5vw,72px);align-items:center}
+  .row:nth-child(even){grid-template-columns:1fr 1.25fr} .row:nth-child(even) .media{order:2}
+  .row>*{min-width:0}
+  @media (max-width:900px){.row,.row:nth-child(even){grid-template-columns:1fr}.row:nth-child(even) .media{order:0}}
+  .media{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--bg2);aspect-ratio:16/10;display:block}
+  .media img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s var(--ease)}
+  a.media:hover img{transform:scale(1.035)}
+  .badge{position:absolute;left:14px;top:14px;font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;background:rgba(5,5,5,.72);backdrop-filter:blur(8px);border:1px solid var(--line2);padding:8px 10px;border-radius:999px}
+  .num{font:500 13px/1 var(--mono);color:var(--dim);letter-spacing:.1em}
+  .row h3{font:600 clamp(30px,3.6vw,48px)/1.02 var(--sans);letter-spacing:-.035em;margin:14px 0 16px}
+  .row p{color:var(--muted);margin:0 0 18px}
+  .row p b{color:var(--text);font-weight:500}
+  .facts{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);margin:24px 0 26px}
+  .facts div{padding:16px 12px 0 0} .facts b{display:block;font:600 26px/1.1 var(--sans);letter-spacing:-.03em} .facts span{font-size:13px;color:var(--muted)}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+  .tags span{font:500 11.5px/1 var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:7px 10px}
+  .links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  .stars{font:500 13px/1 var(--mono);color:var(--muted);padding:0 6px}
+
+  /* terminal panels */
+  .term{aspect-ratio:auto;padding:22px 22px 18px;font:13px/1.6 var(--mono);display:flex;flex-direction:column;gap:14px;background:radial-gradient(600px 300px at 100% 0%,rgba(255,91,46,.09),transparent 70%),var(--bg2)}
+  .term .top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase}
+  .term .top b{color:var(--live);font-weight:500}
+  .term .big{font:600 clamp(42px,5vw,64px)/1 var(--sans);letter-spacing:-.04em}
+  .term .big small{display:block;font:400 15px/1.45 var(--sans);letter-spacing:0;color:var(--muted);margin-top:10px;max-width:440px}
+  .term table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+  .term td{padding:7px 8px 7px 0;border-top:1px solid var(--line);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .term td:first-child{width:38%} .term td:last-child{text-align:right;width:28%;padding-right:0}
+  .term td.miss{color:var(--live)} .term td.hit{color:#7fdc9a}
+  .term .foot{margin-top:auto;color:var(--dim);font-size:11.5px}
+  .term .q{color:var(--muted)} .term .a{color:var(--text);font-family:var(--sans);font-size:15.5px;line-height:1.55} .term .c{color:var(--live)} .term .src{color:var(--dim)}
+
+  /* behind the scenes */
+  .bts{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+  .bts>div{background:var(--bg);padding:30px 28px 32px}
+  .bts h4{font:600 21px/1.2 var(--sans);letter-spacing:-.02em;margin:16px 0 10px}
+  .bts p{margin:0;color:var(--muted);font-size:15.5px}
+  @media (max-width:900px){.bts{grid-template-columns:1fr}}
+
+  /* devlog */
+  .log a{display:grid;grid-template-columns:140px 1fr auto;gap:24px;align-items:baseline;padding:26px 0;border-top:1px solid var(--line);transition:padding .4s var(--ease)}
+  .log a:last-child{border-bottom:1px solid var(--line)}
+  .log a:hover{padding-left:12px} .log a:hover .arr{transform:translateX(4px);color:var(--text)}
+  .log span{font:500 clamp(19px,2.2vw,26px)/1.25 var(--sans);letter-spacing:-.02em}
+  .log .arr{color:var(--dim);transition:transform .3s,color .3s}
+  @media (max-width:640px){.log a{grid-template-columns:1fr auto;gap:6px 16px}.log time{grid-column:1/-1}}
+
+  /* outro */
+  .outro{padding:clamp(100px,14vw,190px) 0 clamp(60px,8vw,100px);text-align:center}
+  .outro h2{font-size:clamp(44px,8vw,116px);max-width:14ch;margin:18px auto 34px}
+  .outro .ctas{justify-content:center}
+  .stack{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:56px}
+  .stack span{font:500 12px/1 var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:9px 12px}
+  footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--dim);font-size:13px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+
+  /* reveal */
+  .rv{opacity:0;transform:translateY(28px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}.ticker div,.dot{animation:none}}
 </style></head>
 <body>
-<nav><div class="wrap">
-  <a class="brand" href="#">Miles Gurule</a>
-  <a class="l" href="#demos">Demos</a>
-  <a class="l hide-sm" href="#open-source">Open source</a>
-  <a class="l hide-sm" href="#client">Client work</a>
-  <a class="l hide-sm" href="devlog.html">Devlog</a>
-  <a class="btn sm" href="https://github.com/milesgurule-png">GitHub</a>
+<nav id="nav"><div class="wrap">
+  <a class="brand" href="#"><i>M</i>Miles Gurule</a>
+  <a class="l" href="#work">Work</a>
+  <a class="l" href="#behind">Behind the scenes</a>
+  <a class="l" href="#devlog">Devlog</a>
+  <a class="btn sm" href="https://github.com/milesgurule-png">GitHub ↗</a>
 </div></nav>
 
-<header class="hero"><div class="wrap">
-  <div class="hero-grid">
-    <div>
-      <p class="eyebrow">Forge Labs · Middle Tennessee</p>
-      <h1>I build AI agent systems, 3D tools and open-source software.</h1>
-      <p class="lead">I'm Miles, a 15-year-old builder. I run a team of AI research agents, ship open-source tools for developers and security teams, and build websites for real clients.</p>
-      <div class="ctas">
-        <a class="btn primary" href="lab/">▶ Try the 3D Science Lab</a>
-        <a class="btn" href="#open-source">Open-source projects</a>
-        <a class="btn" href="https://github.com/milesgurule-png">Follow on GitHub</a>
+<header class="hero">
+  <canvas id="graph" aria-label="My research vault drawn as a 3D graph of notes and links"></canvas>
+  <div class="probe" aria-live="polite"><span class="mono"><span class="dot"></span>My research vault, live</span><b id="probe">479 notes. 4,080 links.</b><small id="probeSub">Move your cursor through it.</small></div>
+  <div class="wrap">
+    <span class="mono">Forge Labs · Middle Tennessee · Age 15</span>
+    <h1>I build things <em>that think.</em></h1>
+    <div class="hero-row">
+      <p class="lead">I'm Miles. I run <b>a team of AI research agents</b>, ship <b>open-source security tools</b>, make <b>3D experiments</b> and build <b>websites for real businesses</b>. All of it hand-written, none of it from templates.</p>
+      <div class="ctas"><a class="btn solid" href="#work">See the work ↓</a><a class="btn" href="https://forgelabs-agency-site.milesgurule.workers.dev/">Hire Forge Labs ↗</a></div>
+    </div>
+  </div>
+</header>
+
+<div class="ticker" aria-hidden="true"><div id="tick">
+  <span><b>3</b> open-source releases</span><span><b>9</b> AI research agents</span><span><b>1,000+</b> evidence-rated notes</span><span><b>4,000+</b> cited links</span><span><b>1</b> client site live</span><span>KEV Watch updates <b>daily</b></span><span><b>0</b> templates</span>
+</div></div>
+
+<main>
+<section id="work"><div class="wrap">
+  <div class="head rv"><div><span class="mono">Selected work · 2026</span><h2>Things I've <em>shipped.</em></h2></div>
+    <p>Everything here is live. Click through and try it, with nothing to install and nothing to sign up for.</p></div>
+
+  <div class="work">
+    <article class="row rv">
+      <a class="media" href="https://forgelabs-agency-site.milesgurule.workers.dev/?for=Hello%20there"><img src="screenshots/forge-labs.jpg" alt="Forge Labs studio site with a company name forged out of sparks" loading="lazy" width="1200" height="593"><span class="badge">Live · try it</span></a>
+      <div>
+        <span class="num">01 / Studio · WebGL</span>
+        <h3>Forge Labs, my studio site</h3>
+        <p>Type any company name and <b>about 11,000 sparks forge it in real time</b>. Click anywhere to strike the anvil. It also has <b>Forge It</b>, a built-in mockup generator: describe a business in one sentence and it designs a full site preview with its own layout, colors, photos and sections.</p>
+        <div class="tags"><span>Three.js</span><span>Custom shaders</span><span>Mockup generator</span><span>Cloudflare Workers</span></div>
+        <div class="links"><a class="btn solid" href="https://forgelabs-agency-site.milesgurule.workers.dev/?for=Hello%20there">Forge a name ↗</a><a class="btn" href="https://forgelabs-agency-site.milesgurule.workers.dev/#forge-it">Try Forge It</a></div>
       </div>
-    </div>
-    <a class="hero-shot" href="lab/"><img src="screenshots/science-lab.gif" alt="AI agents as scientists walking around a 3D research facility" width="728" height="414"><span>Live demo · runs in your browser</span></a>
+    </article>
+
+    <article class="row rv">
+      <a class="media" href="https://garrett-company-site.milesgurule.workers.dev/"><img src="screenshots/garrett.jpg" alt="The Garrett Company website" loading="lazy" width="1000" height="625"><span class="badge">Client · preview</span></a>
+      <div>
+        <span class="num">02 / Client work · Real estate</span>
+        <h3>The Garrett Company</h3>
+        <p>A full site for <b>a third-generation real estate brokerage</b> in Middle Tennessee, founded in 1947. It covers their real history and sales record, commercial and residential property, a service-area map, and search that forgives typos across every town and ZIP code.</p>
+        <div class="facts"><div><b>1947</b><span>founded</span></div><div><b>2,286</b><span>lines, hand-written</span></div><div><b>0</b><span>frameworks</span></div></div>
+        <div class="links"><a class="btn solid" href="https://garrett-company-site.milesgurule.workers.dev/">Visit the site ↗</a><a class="btn" href="devlog.html">Read the build log</a></div>
+      </div>
+    </article>
+
+    <article class="row rv">
+      <a class="media" href="lab/"><img src="screenshots/science-lab.gif" alt="AI agents as scientists walking around a 3D research facility" loading="lazy" width="728" height="414"><span class="badge">Live · 3D</span></a>
+      <div>
+        <span class="num">03 / 3D · Simulation</span>
+        <h3>The Science Lab</h3>
+        <p>My AI agent team as <b>scientists in a 3D research facility</b> with nine themed rooms. They walk to their stations when an agent starts work, talk about their actual research and take coffee breaks. Custom A* pathfinding keeps ten people from colliding.</p>
+        <div class="tags"><span>Three.js</span><span>A* pathfinding</span><span>Agent simulation</span></div>
+        <div class="links"><a class="btn solid" href="lab/">Enter the lab ↗</a><a class="btn" href="posts/walking-scientists.html">How the walking works</a></div>
+      </div>
+    </article>
+
+    <article class="row rv">
+      <div class="media term">
+        <div class="top"><span>KEV Watch</span><b><span class="dot"></span>Live</b></div>
+        <div class="big"><span id="kevBig">6 of 9</span><small>vulnerabilities newly confirmed as exploited had an EPSS score under 0.1 the day before, so a common filter would have skipped them.</small></div>
+        <table id="kevTable"></table>
+        <div class="foot" id="kevFoot">Pulled live from the repo, refreshed daily by a GitHub Action.</div>
+      </div>
+      <div>
+        <span class="num">04 / Open source · Security</span>
+        <h3>Triage Scorecard</h3>
+        <p>How good is your vulnerability triage, really? It replays <b>real CISA and FIRST data day by day, with no peeking ahead</b>, and scores any rule against it. Every morning it publishes what a popular filter missed.</p>
+        <div class="facts"><div><b>1 in 4</b><span>exploited bugs EPSS ≥ 0.1 skips</span></div><div><b>17,310</b><span>alerts a day it still flags</span></div><div><b>0</b><span>dependencies</span></div></div>
+        <div class="links"><a class="btn solid" href="https://github.com/milesgurule-png/triage-scorecard">View on GitHub ↗</a><span class="stars" data-repo="triage-scorecard"></span></div>
+      </div>
+    </article>
+
+    <article class="row rv">
+      <a class="media" href="atom.html"><img src="screenshots/vault-atom.jpg" alt="Vault Atom: research notes drawn as a 3D atom" loading="lazy" width="728" height="414"><span class="badge">Live · Obsidian plugin</span></a>
+      <div>
+        <span class="num">05 / Open source · Data viz</span>
+        <h3>Vault Atom</h3>
+        <p>Turns an Obsidian vault into <b>a 3D atom</b>: folders become orbiting shells and links become bonds. The demo is a snapshot of my own research on history, psychology, math and physics. The plugin works on any vault.</p>
+        <div class="tags"><span>Obsidian</span><span>Three.js</span><span>Graph layout</span><span>MIT</span></div>
+        <div class="links"><a class="btn solid" href="atom.html">Open the atom ↗</a><a class="btn" href="https://github.com/milesgurule-png/obsidian-vault-atom">Plugin</a><span class="stars" data-repo="obsidian-vault-atom"></span></div>
+      </div>
+    </article>
+
+    <article class="row rv">
+      <div class="media term">
+        <div class="top"><span>forge-ai · on-device</span><span>~23 tok/s · M4 Air</span></div>
+        <div class="q">$ forge ask "why bet only a fraction of Kelly?"</div>
+        <div class="a">Full Kelly maximizes long-run growth, but the swings are brutal and it punishes any error in your estimated edge <span class="c">[1]</span>. Betting a fraction gives up a little growth for a much lower chance of ruin <span class="c">[2]</span>.</div>
+        <div class="src">[1] Kelly Criterion ✓<br>[2] Fractional Kelly ✓</div>
+        <div class="foot">Example answer. Every citation is checked against the notes it retrieved.</div>
+      </div>
+      <div>
+        <span class="num">06 / Open source · Local AI</span>
+        <h3>Forge AI</h3>
+        <p>A private assistant that <b>runs entirely on your own computer</b> and answers from your Obsidian notes with citations it double-checks. Nothing leaves your machine. It powers the Science Lab's in-character chat.</p>
+        <div class="tags"><span>Python</span><span>Ollama</span><span>Local RAG</span><span>Apache-2.0</span></div>
+        <div class="links"><a class="btn solid" href="https://github.com/milesgurule-png/forge-ai">View on GitHub ↗</a><span class="stars" data-repo="forge-ai"></span></div>
+      </div>
+    </article>
   </div>
-  <div class="stats">
-    <div class="stat"><b>3</b><span>open-source projects</span></div>
-    <div class="stat"><b>9</b><span>AI research agents</span></div>
-    <div class="stat"><b>1,000+</b><span>evidence-backed notes</span></div>
-    <div class="stat"><b>4,000+</b><span>cited links between ideas</span></div>
+</div></section>
+
+<section id="behind"><div class="wrap">
+  <div class="head rv"><div><span class="mono">Private systems</span><h2>Behind the <em>scenes.</em></h2></div>
+    <p>These run every day but aren't public. They power the research, the demos and the business.</p></div>
+  <div class="bts rv">
+    <div><span class="mono">01 · Agents</span><h4>A nine-agent research team</h4><p>A historian, psychologist, quant, physicist and more, coordinated by a director. They write evidence-rated notes, check every link in one pass and share a source library.</p></div>
+    <div><span class="mono">02 · Knowledge</span><h4>1,000+ connected notes</h4><p>The vault behind the graph at the top of this page. A connection between two ideas has to cite a source, or it doesn't get made.</p></div>
+    <div><span class="mono">03 · Business</span><h4>Lead generation &amp; outreach</h4><p>An AI agent that audits local business websites, scores leads and handles replies. It's how Forge Labs finds clients.</p></div>
   </div>
-</div></header>
+</div></section>
 
-<main class="wrap">
-  <section id="demos">
-    <h2>Live demos</h2>
-    <p class="sub">Both run right in your browser, no install. They use sample data.</p>
-    <div class="grid">
-      <a class="card" href="lab/"><img class="shot" src="screenshots/science-lab.jpg" alt="Science Lab" loading="lazy" width="728" height="414">
-        <div class="body"><span class="tag">3D · Three.js</span><h3>🧪 Forge Labs Science Lab</h3>
-        <p>My AI agent team as scientists in a 3D facility with 9 themed rooms. They walk to their stations when an agent starts work, talk about their real research, and take coffee breaks. Custom A* pathfinding keeps 10 people from walking into each other.</p>
-        <div class="meta"><span class="pill">Three.js</span><span class="pill">A* pathfinding</span></div></div></a>
-      <a class="card" href="atom.html"><img class="shot" src="screenshots/vault-atom.jpg" alt="Vault Atom" loading="lazy" width="728" height="414">
-        <div class="body"><span class="tag">3D · Data viz</span><h3>⚛️ Vault Atom</h3>
-        <p>About 500 research notes on history, psychology, math and physics drawn as one connected atom. Each field is an orbiting shell, linked by over 4,000 cited connections.</p>
-        <div class="meta"><span class="pill">Three.js</span><span class="pill">Graph layout</span></div></div></a>
-    </div>
-  </section>
-
-  <section id="open-source">
-    <h2>Open source</h2>
-    <p class="sub">Free tools anyone can use. Stars and issues are very welcome.</p>
-    <div class="grid">
-      <a class="card" href="https://github.com/milesgurule-png/triage-scorecard"><div class="body">
-        <span class="tag">Security · Node CLI · MIT</span><h3>🎯 Triage Scorecard</h3>
-        <p>How good is your vulnerability triage, really? Scores any prioritization rule against real CISA KEV and FIRST EPSS data, replayed day by day with no future data.</p>
-        <table class="mini"><tr><th>60 real days</th><th>Alerts/day</th><th>KEV recall</th></tr>
-          <tr><td>EPSS ≥ 0.1</td><td>17,310</td><td>75.1%</td></tr>
-          <tr><td>EPSS top 1%</td><td>3,747</td><td>48.5%</td></tr>
-          <tr><td>KEV only</td><td>1,709</td><td>100%</td></tr></table>
-        <div class="code">npx github:milesgurule-png/triage-scorecard</div>
-        <div class="meta"><span class="pill">Zero dependencies</span><span class="stars" data-repo="triage-scorecard"></span></div></div></a>
-      <a class="card" href="https://github.com/milesgurule-png/obsidian-vault-atom"><img class="shot" src="screenshots/vault-atom.jpg" alt="Vault Atom plugin" loading="lazy" width="728" height="414"><div class="body">
-        <span class="tag">Obsidian plugin · MIT</span><h3>⚛️ Vault Atom for Obsidian</h3>
-        <p>Turn your own Obsidian vault into the 3D atom above. Your folders become shells and your links become bonds. Works with any vault, fully configurable.</p>
-        <div class="meta"><span class="pill">Obsidian</span><span class="pill">Three.js</span><span class="stars" data-repo="obsidian-vault-atom"></span></div></div></a>
-      <a class="card" href="https://github.com/milesgurule-png/forge-ai"><div class="body">
-        <span class="tag">Local AI · Python · Apache-2.0</span><h3>🧠 Forge AI</h3>
-        <p>A private AI assistant that runs on your own computer and answers from your Obsidian notes with citations. Nothing leaves your machine. It powers the Science Lab's in-character chat.</p>
-        <div class="code">Ollama + local RAG · ~23 tokens/s on an M4 MacBook Air</div>
-        <div class="meta"><span class="pill">Ollama</span><span class="pill">RAG</span><span class="stars" data-repo="forge-ai"></span></div></div></a>
-    </div>
-  </section>
-
-  <section id="client">
-    <h2>Client work</h2>
-    <p class="sub">Real websites for real businesses.</p>
-    <div class="grid">
-      <a class="card" href="https://garrett-company-site.milesgurule.workers.dev/"><img class="shot" src="screenshots/garrett.jpg" alt="The Garrett Company website" loading="lazy" width="1000" height="625">
-        <div class="body"><span class="tag">Website · Real estate</span><h3>🏡 The Garrett Company</h3>
-        <p>A full site for a third-generation real estate brokerage in Franklin, TN, founded in 1947. Real company history, sales and listings, drone-video hero, and typo-tolerant search over every Middle Tennessee city and ZIP.</p>
-        <div class="meta"><span class="pill">Preview</span><span class="pill">Cloudflare</span></div></div></a>
-      <div class="card private"><div class="body"><span class="tag">Private · AI agents</span><h3>🤖 Research agent team</h3>
-        <p>Nine specialized agents (historian, psychologist, quant, physicist and more) coordinated by a director. They write evidence-rated notes with a one-pass link checker and a shared source library.</p></div></div>
-      <div class="card private"><div class="body"><span class="tag">Private · Automation</span><h3>📈 Lead generation &amp; outreach</h3>
-        <p>An AI lead-generation agent and cold-email setup: website auditing, lead scoring, deliverability and an AI reply handler.</p></div></div>
-    </div>
-  </section>
-
-  <section id="devlog">
-    <h2>Devlog</h2>
-    <p class="sub">What I built, what broke, and what I learned.</p>
-    <div class="log">
-      <a href="devlog.html"><time>Oct 16, 2026</time><span>My first client website: The Garrett Company</span></a>
-      <a href="posts/walking-scientists.html"><time>Deep dive</time><span>How I made 10 scientists walk around a 3D lab without crashing into each other</span></a>
-      <a href="devlog.html"><time>Oct 12, 2026</time><span>Forge Labs, a 3D lab, and going public</span></a>
-    </div>
-  </section>
-
-  <section>
-    <h2>Stack</h2>
-    <div class="stack"><span>JavaScript / Node.js</span><span>Three.js</span><span>React</span><span>Python</span><span>Claude agents</span><span>Ollama / MLX</span><span>Obsidian + Git</span><span>Cloudflare</span><span>GitHub Actions</span></div>
-  </section>
-
-  <div class="follow">
-    <div><h2>Follow along</h2><p>I ship something new almost every week.</p></div>
-    <div class="ctas"><a class="btn primary" href="https://github.com/milesgurule-png">Follow on GitHub</a><a class="btn" href="devlog.html">Read the devlog</a></div>
+<section id="devlog"><div class="wrap">
+  <div class="head rv"><div><span class="mono">Devlog</span><h2>What I learned <em>building it.</em></h2></div></div>
+  <div class="log rv">
+    <a href="devlog.html"><time class="mono">Oct 16, 2026</time><span>My first client website: The Garrett Company</span><b class="arr">→</b></a>
+    <a href="posts/walking-scientists.html"><time class="mono">Deep dive</time><span>How I made 10 scientists walk around a 3D lab without crashing into each other</span><b class="arr">→</b></a>
+    <a href="devlog.html"><time class="mono">Oct 12, 2026</time><span>Forge Labs, a 3D lab, and going public</span><b class="arr">→</b></a>
   </div>
+</div></section>
 
-  <footer>© 2026 Miles Gurule. All rights reserved. The demos use sample data. Code on this site is not licensed for reuse; the open-source projects above carry their own licenses.</footer>
+<section class="outro"><div class="wrap rv">
+  <span class="mono">Next</span>
+  <h2>Have something worth <em>building?</em></h2>
+  <div class="ctas"><a class="btn solid" href="https://forgelabs-agency-site.milesgurule.workers.dev/#contact">Start a project ↗</a><a class="btn" href="https://github.com/milesgurule-png">Follow on GitHub</a></div>
+  <div class="stack"><span>JavaScript</span><span>Node.js</span><span>Three.js / WebGL</span><span>Python</span><span>Claude agents</span><span>Ollama / MLX</span><span>Obsidian</span><span>Cloudflare</span><span>GitHub Actions</span></div>
+</div></section>
 </main>
+
+<footer><div class="wrap"><span>© 2026 Miles Gurule · Forge Labs. All rights reserved.</span><span>Demos use sample data. Code on this site is not licensed for reuse; the open-source projects carry their own licenses.</span></div></footer>
+
 <script>
-  // Live star counts (fails quietly if GitHub's API is rate-limited).
-  document.querySelectorAll('[data-repo]').forEach(function (el) {
-    fetch('https://api.github.com/repos/milesgurule-png/' + el.dataset.repo)
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) { if (d && d.stargazers_count != null) el.textContent = '★ ' + d.stargazers_count; })
-      .catch(function () {});
+  // nav turns solid after the hero
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('solid', scrollY > innerHeight * 0.6);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // ticker: a second copy makes the loop seamless
+  const tick = document.getElementById('tick'); tick.parentNode.appendChild(tick.cloneNode(true));
+
+  // reveal on scroll
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.rv').forEach((el) => io.observe(el));
+
+  // live star counts (quiet if GitHub rate-limits)
+  document.querySelectorAll('[data-repo]').forEach((el) => {
+    fetch('https://api.github.com/repos/milesgurule-png/' + el.dataset.repo).then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d && d.stargazers_count > 0) el.textContent = '★ ' + d.stargazers_count; }).catch(() => {});
+  });
+
+  // KEV Watch, live from the repo; the numbers baked into the page are the fallback
+  const esc = (s) => s.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+  fetch('https://raw.githubusercontent.com/milesgurule-png/triage-scorecard/main/KEV-WATCH.md').then((r) => r.ok ? r.text() : Promise.reject())
+    .then((md) => {
+      const head = md.match(/\*\*(\d+) of (\d+)\*\*/);
+      if (head) document.getElementById('kevBig').textContent = head[1] + ' of ' + head[2];
+      const rows = md.split('\n').filter((l) => /^\| \d{4}-\d\d-\d\d/.test(l)).slice(0, 5).map((l) => l.split('|').map((s) => s.trim()));
+      document.getElementById('kevTable').innerHTML = rows.map((c) => {
+        const cve = (c[2].match(/CVE-\d+-\d+/) || [''])[0], v = c[4], miss = /missed/.test(c[6]), hit = /flagged/.test(c[6]);
+        return '<tr><td>' + esc(cve) + '</td><td>' + esc(c[3]) + '</td><td class="' + (miss ? 'miss' : hit ? 'hit' : '') + '">' + (v === 'not scored' ? 'no score yet' : 'EPSS ' + esc(v)) + '</td></tr>';
+      }).join('');
+      const up = md.match(/Updated (\d{4}-\d\d-\d\d)/);
+      if (up) document.getElementById('kevFoot').textContent = 'Updated ' + up[1] + ' by a GitHub Action · CISA KEV + FIRST EPSS';
+    }).catch(() => {});
+</script>
+
+<script type="module">
+  // Hero: my research vault (atom.json) as a slowly turning 3D graph. Hover a note to read it;
+  // left alone, the graph highlights one well-connected note at a time on its own.
+  import * as THREE from 'three';
+  const canvas = document.getElementById('graph'), hero = canvas.parentElement;
+  const probe = document.getElementById('probe'), probeSub = document.getElementById('probeSub');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const COLORS = { history: '#e07a5f', mind: '#ff7eb6', quant: '#ffb057', frontier: '#74c0fc' };
+  const NAMES = { history: 'History', mind: 'Psychology', quant: 'Math & markets', frontier: 'Physics' };
+  const RAD = { history: 7, mind: 10.5, quant: 14, frontier: 17.5 };
+  const hash = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967295; };
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+  const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+  scene.fog = new THREE.FogExp2(0x050505, 0.02);
+  const world = new THREE.Group(); scene.add(world);
+  function size() {
+    const w = canvas.clientWidth, h = canvas.clientHeight, narrow = w < 760;
+    renderer.setSize(w, h, false); cam.aspect = w / h;
+    cam.position.set(narrow ? 0 : -9, narrow ? -4 : 3, narrow ? 60 : 40); cam.lookAt(narrow ? 0 : -9, narrow ? -4 : 3, 0);
+    world.position.set(narrow ? 0 : 5, narrow ? 4 : 4.5, 0); cam.updateProjectionMatrix();
+  }
+  size(); addEventListener('resize', size);
+
+  const d = await (await fetch('atom.json')).json();
+  const n = d.nodes.length, keep = d.nodes.map((x) => !!COLORS[x.shell]);
+  const pos = new Float32Array(n * 3), col = new Float32Array(n * 3), siz = new Float32Array(n), deg = new Array(n).fill(0);
+  d.links.forEach(([a, b]) => { deg[a]++; deg[b]++; });
+  const per = {}, seen = {}, c = new THREE.Color();
+  d.nodes.forEach((x) => { if (COLORS[x.shell]) per[x.shell] = (per[x.shell] || 0) + 1; });
+  // nested spheres, one per research field; notes spread evenly on each (golden-angle spiral)
+  d.nodes.forEach((x, i) => {
+    if (!keep[i]) return;
+    const k = seen[x.shell] = (seen[x.shell] || 0) + 1, N = per[x.shell];
+    const y = 1 - 2 * (k - 0.5) / N, r = Math.sqrt(1 - y * y), th = k * 2.39996 + hash(x.id) * 0.4, rad = RAD[x.shell] * (0.88 + hash(x.id + 'r') * 0.24);
+    pos.set([Math.cos(th) * r * rad, y * rad * 0.8, Math.sin(th) * r * rad], i * 3);
+    c.set(COLORS[x.shell]); col.set([c.r, c.g, c.b], i * 3);
+    siz[i] = 0.6 + Math.min(1.7, Math.sqrt(deg[i]) * 0.24);
+  });
+  const total = keep.filter(Boolean).length;
+
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setAttribute('size', new THREE.BufferAttribute(siz, 1));
+  const uniforms = { uPx: { value: renderer.getPixelRatio() }, uHover: { value: -1 }, uT: { value: 0 } };
+  const pts = new THREE.Points(g, new THREE.ShaderMaterial({
+    uniforms, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: true,
+    vertexShader: `attribute float size; varying vec3 vC; varying float vH; uniform float uPx, uHover, uT;
+      void main(){ vC = color; vH = abs(float(gl_VertexID) - uHover) < 0.5 ? 1.0 : 0.0;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * (1.0 + vH * (1.8 + 0.3 * sin(uT * 6.0))) * uPx * (200.0 / -mv.z);
+        gl_Position = projectionMatrix * mv; }`,
+    fragmentShader: `varying vec3 vC; varying float vH;
+      void main(){ float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard; float a = smoothstep(0.5, 0.0, d);
+        gl_FragColor = vec4(mix(vC, vec3(1.0), vH * 0.6) * (0.55 + a), a * a * 1.4); }`
+  }));
+  world.add(pts);
+
+  // links: faint lines everywhere; the hovered note's links light up
+  const L = d.links.filter(([a, b]) => keep[a] && keep[b]);
+  const lp = new Float32Array(L.length * 6), lc = new Float32Array(L.length * 6), adj = new Map();
+  L.forEach(([a, b], k) => {
+    lp.set([pos[a*3], pos[a*3+1], pos[a*3+2], pos[b*3], pos[b*3+1], pos[b*3+2]], k * 6);
+    lc.set([col[a*3], col[a*3+1], col[a*3+2], col[b*3], col[b*3+1], col[b*3+2]], k * 6);
+    for (const [x, y] of [[a, b], [b, a]]) { if (!adj.has(x)) adj.set(x, []); adj.get(x).push(y); }
+  });
+  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.BufferAttribute(lp, 3)); lg.setAttribute('color', new THREE.BufferAttribute(lc, 3));
+  world.add(new THREE.LineSegments(lg, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.07, depthWrite: false, blending: THREE.AdditiveBlending })));
+  const hg = new THREE.BufferGeometry();
+  world.add(new THREE.LineSegments(hg, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5, depthWrite: false, blending: THREE.AdditiveBlending })));
+  probe.textContent = total + ' notes. ' + L.length.toLocaleString() + ' links.';
+
+  let hover = -1, swap = 0;
+  function setHover(i) {
+    if (i === hover) return; hover = i; uniforms.uHover.value = i;
+    const nb = i < 0 ? [] : (adj.get(i) || []), a = new Float32Array(nb.length * 6);
+    nb.forEach((j, k) => a.set([pos[i*3], pos[i*3+1], pos[i*3+2], pos[j*3], pos[j*3+1], pos[j*3+2]], k * 6));
+    hg.setAttribute('position', new THREE.BufferAttribute(a, 3));
+    if (i < 0) return;
+    const x = d.nodes[i]; probe.style.opacity = probeSub.style.opacity = 0; clearTimeout(swap);
+    swap = setTimeout(() => { probe.textContent = x.id; probeSub.textContent = NAMES[x.shell] + ' · linked to ' + nb.length + ' other notes'; probe.style.opacity = probeSub.style.opacity = 1; }, 140);
+  }
+  const strong = [...Array(n).keys()].filter((i) => keep[i] && deg[i] >= 14);
+
+  const ray = new THREE.Raycaster(); ray.params.Points.threshold = 0.5;
+  const m = new THREE.Vector2(9, 9), look = { x: 0, y: 0 }; let lastMove = -9, visible = true;
+  const clock = new THREE.Clock();
+  hero.addEventListener('pointermove', (e) => {
+    const r = canvas.getBoundingClientRect(); m.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    look.x = m.x; look.y = m.y; lastMove = clock.elapsedTime;
+  });
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(canvas);
+
+  let auto = -9;
+  renderer.setAnimationLoop(() => {
+    const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
+    if (!visible || document.hidden) return;
+    uniforms.uT.value = t;
+    if (!reduce) world.rotation.y += dt * 0.05;
+    world.rotation.x += (look.y * 0.16 - world.rotation.x) * 0.04;
+    world.rotation.z += (-look.x * 0.06 - world.rotation.z) * 0.04;
+    if (t - lastMove < 3) {
+      ray.setFromCamera(m, cam); const hit = ray.intersectObject(pts).find((h) => keep[h.index]);
+      if (hit) setHover(hit.index);
+    } else if (t - auto > 3.4 && strong.length) { auto = t; setHover(strong[Math.floor(Math.random() * strong.length)]); }
+    renderer.render(scene, cam);
   });
 </script>
 </body></html>
